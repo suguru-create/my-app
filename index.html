@@ -1148,15 +1148,15 @@
     </div>
     <div class="form-group" style="padding:0 0 12px">
       <div class="form-label">カテゴリ</div>
-      <select class="form-control">
-        <option>ワーキング</option>
-        <option>メディカル</option>
-        <option>サービス</option>
+      <select class="form-control" id="new-category">
+        <option value="working">ワーキング</option>
+        <option value="medical">メディカル</option>
+        <option value="service">サービス</option>
       </select>
     </div>
     <div class="form-group" style="padding:0 0 16px">
       <div class="form-label">商談ステータス</div>
-      <select class="form-control">
+      <select class="form-control" id="new-status">
         <option>脈なし</option>
         <option>反応あり</option>
         <option>見積もり</option>
@@ -1189,9 +1189,9 @@
     </div>
     <div class="form-group" style="padding:0 0 16px">
       <div class="form-label">メモ</div>
-      <textarea class="form-control" placeholder="初回訪問メモ・気づきなど…" style="min-height:70px"></textarea>
+      <textarea class="form-control" id="new-memo" placeholder="初回訪問メモ・気づきなど…" style="min-height:70px"></textarea>
     </div>
-    <button class="topbar-action" style="width:100%;padding:14px;border-radius:12px;font-size:15px" onclick="closeModal('modal-add');showToast('顧客を登録しました')">登録する</button>
+    <button class="topbar-action" style="width:100%;padding:14px;border-radius:12px;font-size:15px" onclick="saveNewCustomer()">登録する</button>
   </div>
 </div>
 
@@ -1201,10 +1201,10 @@
     <div class="modal-handle"></div>
     <div class="modal-title">ステータスを変更</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-      <button onclick="closeModal('modal-status');showToast('脈なし に変更しました')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:14px;border-radius:10px;font-size:14px;font-family:inherit;cursor:pointer;text-align:left">😶 脈なし</button>
-      <button onclick="closeModal('modal-status');showToast('反応あり に変更しました')" style="background:#3a3200;border:1px solid var(--accent4);color:var(--accent4);padding:14px;border-radius:10px;font-size:14px;font-family:inherit;cursor:pointer;text-align:left">⭐ 反応あり</button>
-      <button onclick="closeModal('modal-status');showToast('見積もり に変更しました')" style="background:#3a2200;border:1px solid var(--warn);color:var(--warn);padding:14px;border-radius:10px;font-size:14px;font-family:inherit;cursor:pointer;text-align:left">📝 見積もり</button>
-      <button onclick="closeModal('modal-status');showToast('受注 に変更しました 🎉')" style="background:#003a26;border:1px solid var(--accent2);color:var(--accent2);padding:14px;border-radius:10px;font-size:14px;font-family:inherit;cursor:pointer;text-align:left">✅ 受注</button>
+      <button onclick="changeCustomerStatus('脈なし')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:14px;border-radius:10px;font-size:14px;font-family:inherit;cursor:pointer;text-align:left">😶 脈なし</button>
+      <button onclick="changeCustomerStatus('反応あり')" style="background:#3a3200;border:1px solid var(--accent4);color:var(--accent4);padding:14px;border-radius:10px;font-size:14px;font-family:inherit;cursor:pointer;text-align:left">⭐ 反応あり</button>
+      <button onclick="changeCustomerStatus('見積もり')" style="background:#3a2200;border:1px solid var(--warn);color:var(--warn);padding:14px;border-radius:10px;font-size:14px;font-family:inherit;cursor:pointer;text-align:left">📝 見積もり</button>
+      <button onclick="changeCustomerStatus('受注')" style="background:#003a26;border:1px solid var(--accent2);color:var(--accent2);padding:14px;border-radius:10px;font-size:14px;font-family:inherit;cursor:pointer;text-align:left">✅ 受注</button>
     </div>
   </div>
 </div>
@@ -1274,48 +1274,61 @@
   function closeModal(id) { document.getElementById(id).classList.remove('open'); }
   function closeModalOutside(e, id) { if(e.target.classList.contains('modal-overlay')) closeModal(id); }
 
-  // ===== 顧客データ =====
-  const customers = [
-    { id:1, company:'株式会社丸山製作所', person:'鈴木 太郎 部長', category:'working', status:'反応あり', phone:'0532-00-0000', address:'愛知県豊橋市神明町42-1', nextVisitDate:'2025/03/22', visitCount:'4回目', lastVisitDays:10, lastVisitDate:'2024年12月10日', alert:'warn', memo:'作業服上下・安全靴に興味あり。4月の新入社員研修に合わせて検討したい。予算は1人あたり1.5万円程度。' },
-    { id:2, company:'医療法人明和会',     person:'田中 義雄 院長', category:'medical', status:'見積もり', phone:'0532-11-2222', address:'愛知県豊橋市広小路1-1', nextVisitDate:'2025/03/25', visitCount:'6回目', lastVisitDays:20, lastVisitDate:'2024年11月15日', alert:'', memo:'ナース服の刷新を検討中。3パターンの見積もりを提出済み。' },
-    { id:3, company:'豊川商事株式会社',   person:'山田 花子 課長', category:'service', status:'受注', phone:'0533-88-9999', address:'愛知県豊川市諏訪3-1', nextVisitDate:'2025/04/10', visitCount:'8回目', lastVisitDays:30, lastVisitDate:'2025年02月10日', alert:'', memo:'サービススタッフ用ポロシャツ30着受注。納品スケジュール調整中。' },
-    { id:4, company:'浜松工業株式会社',   person:'伊藤 一郎 社長', category:'working', status:'脈なし', phone:'053-444-5555', address:'静岡県浜松市中区1-2-3', nextVisitDate:'未定', visitCount:'1回目', lastVisitDays:128, lastVisitDate:'2024年07月20日', alert:'danger', memo:'既存業者の切り替え予定なし。来年再度アプローチ。' },
-    { id:5, company:'中部フード株式会社', person:'小林 次郎 部長', category:'service', status:'反応あり', phone:'0564-22-3333', address:'愛知県岡崎市康生町2-2', nextVisitDate:'2025/04/01', visitCount:'2回目', lastVisitDays:45, lastVisitDate:'2025年01月10日', alert:'', memo:'食品工場用白衣のサンプル手配中。' },
-    { id:6, company:'豊川フーズ株式会社', person:'加藤 雄一 担当', category:'service', status:'脈なし', phone:'0533-77-8888', address:'愛知県豊川市御油町3-3', nextVisitDate:'未定', visitCount:'3回目', lastVisitDays:91, lastVisitDate:'2024年09月15日', alert:'warn', memo:'衛生帽子の価格のみ聞かれた。当面は現状維持とのこと。' },
-    { id:7, company:'三河メディカル',     person:'佐藤 京子 院長', category:'medical', status:'反応あり', phone:'0532-66-7777', address:'愛知県豊橋市牛川町4-4', nextVisitDate:'2025/03/26', visitCount:'5回目', lastVisitDays:15, lastVisitDate:'2025年02月10日', alert:'', memo:'スクラブのカラー見本を持参予定。ピンクとネイビーで迷っている。' },
-    { id:8, company:'東三河建設株式会社', person:'渡辺 健二 課長', category:'working', status:'脈なし', phone:'0532-55-6666', address:'愛知県豊橋市前田町5-5', nextVisitDate:'未定', visitCount:'2回目', lastVisitDays:60, lastVisitDate:'2024年12月25日', alert:'', memo:'安全靴のスポット発注のみ。全体的なユニフォーム更新は未定。' }
-  ];
+  // ===== 顧客データ (Local Storage化) =====
+  let customers = [];
+  const storedDb = localStorage.getItem('sales_app_customers_db');
+  if (storedDb) {
+    try { customers = JSON.parse(storedDb); } catch(e) {}
+  }
 
-  customers.forEach(c => {
-    if (c.id === 1) {
-      c.logs = [
-        { count: '1回目', date: '2024-03-22', memo: '初訪問。受付で名刺交換のみ。担当者不在だったため後日再訪予定。' },
-        { count: '2回目', date: '2024-06-18', memo: '鈴木部長と面会。工場見学後に商談。作業着の更新を来期に検討している。' },
-        { count: '3回目', date: '2024-09-05', memo: '予算確認。春の新入社員分でまずは検討との回答。' },
-        { count: '4回目', date: '2024-12-10', memo: 'カタログを持参。作業服サンプルを見せたところ色味を気に入ってもらえた。' },
-      ];
-    } else {
-      c.logs = [];
-      const dummyMemos = [
-        '初回訪問。挨拶と名刺交換。',
-        '現状の課題についてヒアリングを実施。',
-        'カタログを持参し、いくつか商品を提案。',
-        'サンプルの試着を実施。サイズ感をご確認いただいた。',
-        '見積書を提出し、価格感の擦り合わせ。',
-        '再度見積もりを調整して提出。',
-        '導入に向けた最終的な仕様確認の打ち合わせ。',
-        '細かい契約条件の調整と最終合意。'
-      ];
-      const num = parseInt(c.visitCount) || 0;
-      for (let i = 1; i <= num; i++) {
-        c.logs.push({
-          count: i + '回目',
-          date: '2024-' + String(12 - num + i).padStart(2, '0') + '-15',
-          memo: dummyMemos[i-1] || '定期訪問。状況確認を実施。'
-        });
+  function saveDb() {
+    localStorage.setItem('sales_app_customers_db', JSON.stringify(customers));
+  }
+
+  if (customers.length === 0) {
+    customers = [
+      { id:1, company:'株式会社丸山製作所', person:'鈴木 太郎 部長', category:'working', status:'反応あり', phone:'0532-00-0000', address:'愛知県豊橋市神明町42-1', nextVisitDate:'2025/03/22', visitCount:'4回目', lastVisitDays:10, lastVisitDate:'2024年12月10日', alert:'warn', memo:'作業服上下・安全靴に興味あり。4月の新入社員研修に合わせて検討したい。予算は1人あたり1.5万円程度。' },
+      { id:2, company:'医療法人明和会',     person:'田中 義雄 院長', category:'medical', status:'見積もり', phone:'0532-11-2222', address:'愛知県豊橋市広小路1-1', nextVisitDate:'2025/03/25', visitCount:'6回目', lastVisitDays:20, lastVisitDate:'2024年11月15日', alert:'', memo:'ナース服の刷新を検討中。3パターンの見積もりを提出済み。' },
+      { id:3, company:'豊川商事株式会社',   person:'山田 花子 課長', category:'service', status:'受注', phone:'0533-88-9999', address:'愛知県豊川市諏訪3-1', nextVisitDate:'2025/04/10', visitCount:'8回目', lastVisitDays:30, lastVisitDate:'2025年02月10日', alert:'', memo:'サービススタッフ用ポロシャツ30着受注。納品スケジュール調整中。' },
+      { id:4, company:'浜松工業株式会社',   person:'伊藤 一郎 社長', category:'working', status:'脈なし', phone:'053-444-5555', address:'静岡県浜松市中区1-2-3', nextVisitDate:'未定', visitCount:'1回目', lastVisitDays:128, lastVisitDate:'2024年07月20日', alert:'danger', memo:'既存業者の切り替え予定なし。来年再度アプローチ。' },
+      { id:5, company:'中部フード株式会社', person:'小林 次郎 部長', category:'service', status:'反応あり', phone:'0564-22-3333', address:'愛知県岡崎市康生町2-2', nextVisitDate:'2025/04/01', visitCount:'2回目', lastVisitDays:45, lastVisitDate:'2025年01月10日', alert:'', memo:'食品工場用白衣のサンプル手配中。' },
+      { id:6, company:'豊川フーズ株式会社', person:'加藤 雄一 担当', category:'service', status:'脈なし', phone:'0533-77-8888', address:'愛知県豊川市御油町3-3', nextVisitDate:'未定', visitCount:'3回目', lastVisitDays:91, lastVisitDate:'2024年09月15日', alert:'warn', memo:'衛生帽子の価格のみ聞かれた。当面は現状維持とのこと。' },
+      { id:7, company:'三河メディカル',     person:'佐藤 京子 院長', category:'medical', status:'反応あり', phone:'0532-66-7777', address:'愛知県豊橋市牛川町4-4', nextVisitDate:'2025/03/26', visitCount:'5回目', lastVisitDays:15, lastVisitDate:'2025年02月10日', alert:'', memo:'スクラブのカラー見本を持参予定。ピンクとネイビーで迷っている。' },
+      { id:8, company:'東三河建設株式会社', person:'渡辺 健二 課長', category:'working', status:'脈なし', phone:'0532-55-6666', address:'愛知県豊橋市前田町5-5', nextVisitDate:'未定', visitCount:'2回目', lastVisitDays:60, lastVisitDate:'2024年12月25日', alert:'', memo:'安全靴のスポット発注のみ。全体的なユニフォーム更新は未定。' }
+    ];
+
+    customers.forEach(c => {
+      if (c.id === 1) {
+        c.logs = [
+          { count: '1回目', date: '2024-03-22', memo: '初訪問。受付で名刺交換のみ。担当者不在だったため後日再訪予定。' },
+          { count: '2回目', date: '2024-06-18', memo: '鈴木部長と面会。工場見学後に商談。作業着の更新を来期に検討している。' },
+          { count: '3回目', date: '2024-09-05', memo: '予算確認。春の新入社員分でまずは検討との回答。' },
+          { count: '4回目', date: '2024-12-10', memo: 'カタログを持参。作業服サンプルを見せたところ色味を気に入ってもらえた。' },
+        ];
+      } else {
+        c.logs = [];
+        const dummyMemos = [
+          '初回訪問。挨拶と名刺交換。',
+          '現状の課題についてヒアリングを実施。',
+          'カタログを持参し、いくつか商品を提案。',
+          'サンプルの試着を実施。サイズ感をご確認いただいた。',
+          '見積書を提出し、価格感の擦り合わせ。',
+          '再度見積もりを調整して提出。',
+          '導入に向けた最終的な仕様確認の打ち合わせ。',
+          '細かい契約条件の調整と最終合意。'
+        ];
+        const num = parseInt(c.visitCount) || 0;
+        for (let i = 1; i <= num; i++) {
+          c.logs.push({
+            count: i + '回目',
+            date: '2024-' + String(12 - num + i).padStart(2, '0') + '-15',
+            memo: dummyMemos[i-1] || '定期訪問。状況確認を実施。'
+          });
+        }
       }
-    }
-  });
+    });
+    saveDb();
+  }
 
   function openCustomerDetail(id) {
     activeCustomerId = id;
@@ -1461,6 +1474,58 @@
     }, 2200);
   }
 
+  // データ登録アクション群
+  function saveNewCustomer() {
+    const com = document.getElementById('new-company').value.trim();
+    const per = document.getElementById('new-person').value.trim();
+    const phone = document.getElementById('new-phone').value.trim();
+    const cat = document.getElementById('new-category').value;
+    const stat = document.getElementById('new-status').value;
+    const memo = document.getElementById('new-memo').value.trim();
+
+    if(!com) { showToast('会社名を入力してください'); return; }
+
+    const newId = customers.length ? Math.max(...customers.map(c => c.id)) + 1 : 1;
+    customers.unshift({
+      id: newId,
+      company: com,
+      person: per || '担当者未定',
+      category: cat,
+      status: stat,
+      phone: phone,
+      address: '',
+      nextVisitDate: '未定',
+      visitCount: '0回目',
+      lastVisitDays: 0,
+      lastVisitDate: '',
+      alert: '',
+      memo: memo,
+      logs: []
+    });
+
+    saveDb();
+    renderCustomerList();
+    closeModal('modal-add');
+    showToast('新しい顧客を登録しました ✅');
+
+    document.getElementById('new-company').value = '';
+    document.getElementById('new-person').value = '';
+    document.getElementById('new-phone').value = '';
+    document.getElementById('new-memo').value = '';
+  }
+
+  function changeCustomerStatus(newStatus) {
+    const c = customers.find(x => x.id === activeCustomerId);
+    if(c) {
+      c.status = newStatus;
+      saveDb();
+      renderCustomerList();
+      openCustomerDetail(activeCustomerId);
+    }
+    closeModal('modal-status');
+    showToast(`ステータスを ${newStatus} に変更しました ✅`);
+  }
+
   // ワンボタン記録（今日・次の回数を自動セット）
   function oneButtonRecord() {
     const c = customers.find(x => x.id === activeCustomerId);
@@ -1471,7 +1536,10 @@
     c.logs.push({ count: nextCount, date: today, memo: '' });
     c.logs.sort((a, b) => new Date(a.date) - new Date(b.date));
     c.visitCount = c.logs.length + '回目';
+    
+    saveDb();
     renderLogs();
+    renderCustomerList();
     showToast('訪問を記録しました ✅');
     setTimeout(() => showScreen('screen-detail'), 800);
   }
@@ -1487,7 +1555,6 @@
 
     if(!date) { showToast('訪問日を入力してください'); return; }
 
-    // 同じ回数が既にあれば上書き、なければ追加
     const existing = c.logs.findIndex(l => l.count === count);
     if(existing >= 0) {
       c.logs[existing] = { count, date, memo };
@@ -1496,10 +1563,11 @@
       c.visitCount = c.logs.length + '回目';
     }
 
-    // 日付の古い順にソート（昇順）
     c.logs.sort((a, b) => new Date(a.date) - new Date(b.date));
-
+    
+    saveDb();
     renderLogs();
+    renderCustomerList();
     document.getElementById('new-log-memo').value = '';
     showToast('訪問ログを保存しました ✅');
     setTimeout(() => showScreen('screen-detail'), 800);
