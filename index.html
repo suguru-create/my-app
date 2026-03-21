@@ -1472,12 +1472,13 @@
     document.getElementById('camera-area').style.display = 'none';
     document.getElementById('ai-scanning').classList.add('show');
 
-    // 読み込んでリサイズ・圧縮
+    // 読み込んでリサイズ・圧縮 (高画質化)
     const reader = new FileReader();
     reader.onload = function(event) {
       const img = new Image();
       img.onload = function() {
-        const max_size = 1000;
+        // 名刺の小さな文字をAIに読ませるため、フルHD相当(1920px)にリサイズ
+        const max_size = 1920;
         let w = img.width;
         let h = img.height;
         if (w > h && w > max_size) { h *= max_size / w; w = max_size; }
@@ -1489,8 +1490,8 @@
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
         
-        // JPEG形式で圧縮して軽量化
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+        // JPEG形式で圧縮して軽量化しつつ、品質を0.95(95%)に上げて文字潰れを防ぐ
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.95);
         sendImageToGemini(compressedBase64);
       }
       img.src = event.target.result;
