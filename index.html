@@ -1119,7 +1119,8 @@
     <div class="modal-handle"></div>
     <div class="modal-title">顧客を追加</div>
 
-    <div class="camera-area" id="camera-area" onclick="startScan()">
+    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handleImageUpload(event)">
+    <div class="camera-area" id="camera-area" onclick="document.getElementById('camera-input').click()">
       <div class="camera-icon">📷</div>
       <div class="camera-text">名刺を撮影してAI自動入力</div>
       <div class="camera-sub">タップしてカメラを起動</div>
@@ -1460,18 +1461,74 @@
 
   renderCustomerList();
 
-  // 名刺スキャン演出
-  function startScan() {
+  // ===== 本物の名刺スキャン＆AI解析 =====
+  function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // モーダルのUIをスキャン中に変更
     document.getElementById('camera-area').style.display = 'none';
     document.getElementById('ai-scanning').classList.add('show');
-    setTimeout(() => {
+
+    // 読み込んでリサイズ・圧縮
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const img = new Image();
+      img.onload = function() {
+        const max_size = 1000;
+        let w = img.width;
+        let h = img.height;
+        if (w > h && w > max_size) { h *= max_size / w; w = max_size; }
+        else if (h > max_size) { w *= max_size / h; h = max_size; }
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        
+        // JPEG形式で圧縮して軽量化
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+        sendImageToGemini(compressedBase64);
+      }
+      img.src = event.target.result;
+    }
+    reader.readAsDataURL(file);
+    e.target.value = ''; // 連続撮影のためにリセット
+  }
+
+  async function sendImageToGemini(base64Image) {
+    try {
+      const response = await fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'scanBusinessCard',
+          imageData: base64Image
+        })
+      });
+
+      if (!response.ok) throw new Error('通信エラー');
+      const result = await response.json();
+      
+      if (result.status === 'success') {
+        const data = result.data;
+        // フォームへ反映
+        document.getElementById('new-company').value = data.company || '';
+        document.getElementById('new-person').value = data.person || '';
+        document.getElementById('new-phone').value = data.phone || '';
+        showToast('名刺を読み取りました ✨');
+      } else {
+        throw new Error(result.message || 'APIエラー');
+      }
+    } catch(err) {
+      alert('名刺の読み取りに失敗しました。もう少し明るい場所で撮影するか、文字がはっきり見えるようにお試しください。\nエラー詳細: ' + err.message);
+      showToast('⚠️ 解析エラー');
+      console.error(err);
+    } finally {
       document.getElementById('ai-scanning').classList.remove('show');
       document.getElementById('camera-area').style.display = 'block';
-      document.getElementById('new-company').value = '株式会社サンプル製作所';
-      document.getElementById('new-person').value = '佐藤 健一';
-      document.getElementById('new-phone').value = '0533-12-3456';
-      showToast('名刺の読み取りが完了しました ✨');
-    }, 2200);
+    }
   }
 
   // データ登録アクション群
