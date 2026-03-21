@@ -1119,11 +1119,13 @@
     <div class="modal-handle"></div>
     <div class="modal-title">顧客を追加</div>
 
-    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handleImageUpload(event)">
-    <div class="camera-area" id="camera-area" onclick="document.getElementById('camera-input').click()">
-      <div class="camera-icon">📷</div>
-      <div class="camera-text">名刺を撮影してAI自動入力</div>
-      <div class="camera-sub">タップしてカメラを起動</div>
+    <div class="camera-area" id="camera-area" style="position:relative; overflow:hidden;">
+      <input type="file" accept="image/*" capture="environment" onchange="handleImageUpload(event)" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; z-index:10; cursor:pointer;">
+      <div style="pointer-events:none;">
+        <div class="camera-icon">📷</div>
+        <div class="camera-text">名刺を撮影してAI自動入力</div>
+        <div class="camera-sub">タップしてカメラを起動</div>
+      </div>
     </div>
 
     <div class="ai-scanning" id="ai-scanning">
