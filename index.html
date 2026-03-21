@@ -1150,6 +1150,30 @@
       <input type="tel" class="form-control" id="new-phone" placeholder="0532-00-0000">
     </div>
     <div class="form-group" style="padding:0 0 12px">
+      <div class="form-label">携帯番号</div>
+      <input type="tel" class="form-control" id="new-mobile" placeholder="090-0000-0000">
+    </div>
+    <div class="form-group" style="padding:0 0 12px">
+      <div class="form-label">FAX</div>
+      <input type="tel" class="form-control" id="new-fax" placeholder="0532-00-0000">
+    </div>
+    <div class="form-group" style="padding:0 0 12px">
+      <div class="form-label">メール</div>
+      <input type="email" class="form-control" id="new-email" placeholder="example@example.com">
+    </div>
+    <div class="form-group" style="padding:0 0 12px">
+      <div class="form-label">郵便番号</div>
+      <input type="text" class="form-control" id="new-postal-code" placeholder="〒000-0000">
+    </div>
+    <div class="form-group" style="padding:0 0 12px">
+      <div class="form-label">住所</div>
+      <input type="text" class="form-control" id="new-address" placeholder="愈知県豊橋市…">
+    </div>
+    <div class="form-group" style="padding:0 0 12px">
+      <div class="form-label">HP / URL</div>
+      <input type="url" class="form-control" id="new-website" placeholder="https://">
+    </div>
+    <div class="form-group" style="padding:0 0 12px">
       <div class="form-label">カテゴリ</div>
       <select class="form-control" id="new-category">
         <option value="working">ワーキング</option>
@@ -1520,6 +1544,12 @@
         document.getElementById('new-company').value = data.company || '';
         document.getElementById('new-person').value = data.person || '';
         document.getElementById('new-phone').value = data.phone || '';
+        document.getElementById('new-mobile').value = data.mobile || '';
+        document.getElementById('new-fax').value = data.fax || '';
+        document.getElementById('new-email').value = data.email || '';
+        document.getElementById('new-postal-code').value = data.postal_code || '';
+        document.getElementById('new-address').value = data.address || '';
+        document.getElementById('new-website').value = data.website || '';
         showToast('名刺を読み取りました ✨');
       } else {
         throw new Error(result.message || 'APIエラー');
@@ -1539,6 +1569,12 @@
     const com = document.getElementById('new-company').value.trim();
     const per = document.getElementById('new-person').value.trim();
     const phone = document.getElementById('new-phone').value.trim();
+    const mobile = document.getElementById('new-mobile').value.trim();
+    const fax = document.getElementById('new-fax').value.trim();
+    const email = document.getElementById('new-email').value.trim();
+    const postalCode = document.getElementById('new-postal-code').value.trim();
+    const address = document.getElementById('new-address').value.trim();
+    const website = document.getElementById('new-website').value.trim();
     const cat = document.getElementById('new-category').value;
     const stat = document.getElementById('new-status').value;
     const memo = document.getElementById('new-memo').value.trim();
@@ -1553,7 +1589,12 @@
       category: cat,
       status: stat,
       phone: phone,
-      address: '',
+      mobile: mobile,
+      fax: fax,
+      email: email,
+      postalCode: postalCode,
+      address: address,
+      website: website,
       nextVisitDate: '未定',
       visitCount: '0回目',
       lastVisitDays: 0,
@@ -1571,6 +1612,12 @@
     document.getElementById('new-company').value = '';
     document.getElementById('new-person').value = '';
     document.getElementById('new-phone').value = '';
+    document.getElementById('new-mobile').value = '';
+    document.getElementById('new-fax').value = '';
+    document.getElementById('new-email').value = '';
+    document.getElementById('new-postal-code').value = '';
+    document.getElementById('new-address').value = '';
+    document.getElementById('new-website').value = '';
     document.getElementById('new-memo').value = '';
   }
 
