@@ -1,6 +1,6 @@
 const CACHE_NAME = 'sales-app-v1';
 const urlsToCache = [
-  './sales-app-POST対応版.html',
+  './index.html',
   './manifest.json',
   './icon.png'
 ];
