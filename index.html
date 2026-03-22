@@ -1368,6 +1368,23 @@
   const nd = document.getElementById('new-visit-date');
   if(nd) nd.value = now.toISOString().split('T')[0];
 
+  const statusBadgeMap = {
+    '脈なし':  'badge-none',
+    '反応あり': 'badge-react',
+    '見積もり': 'badge-quote',
+    '受注':    'badge-order',
+  };
+  const catPillMap = {
+    working: 'pill-working',
+    medical: 'pill-medical',
+    service: 'pill-service',
+  };
+  const catLabelMap = {
+    working: 'ワーキング',
+    medical: 'メディカル',
+    service: 'サービス',
+  };
+
   let activeCustomerId = 1;
 
   function formatDate(dateStr) {
@@ -1407,8 +1424,10 @@
 
   // 画面切り替え
   function showScreen(id, navBtn) {
+    const el = document.getElementById(id);
+    if (!el) { console.error('Screen not found:', id); return; }
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     if(navBtn) navBtn.classList.add('active');
     window.scrollTo(0,0);
@@ -1416,8 +1435,15 @@
   }
 
   // モーダル
-  function showModal(id) { document.getElementById(id).classList.add('open'); }
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function showModal(id) { 
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('open'); }
+    else { console.error('Modal not found:', id); }
+  }
+  function closeModal(id) { 
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('open'); }
+  }
   function closeModalOutside(e, id) { if(e.target.classList.contains('modal-overlay')) closeModal(id); }
 
   // ===== 顧客データ (Local Storage化) =====
@@ -1571,23 +1597,6 @@
 
   let activeCategory = 'all';
   let activeStatus   = '';
-
-  const statusBadgeMap = {
-    '脈なし':  'badge-none',
-    '反応あり': 'badge-react',
-    '見積もり': 'badge-quote',
-    '受注':    'badge-order',
-  };
-  const catPillMap = {
-    working: 'pill-working',
-    medical: 'pill-medical',
-    service: 'pill-service',
-  };
-  const catLabelMap = {
-    working: 'ワーキング',
-    medical: 'メディカル',
-    service: 'サービス',
-  };
 
   function renderCustomerList() {
     const query = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
