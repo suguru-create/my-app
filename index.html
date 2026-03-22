@@ -575,7 +575,7 @@
 <div class="screen active" id="screen-dashboard">
   <div class="topbar">
     <div>
-      <div class="topbar-title">🏢 営業管理</div>
+      <div class="topbar-title">🏢 営業管理 (最新版v2)</div>
       <div class="topbar-sub">タカギユニフォーム</div>
     </div>
     <div style="display:flex;gap:8px">
@@ -2082,6 +2082,7 @@
   // ロード時＆オンライン復帰時の処理
   window.addEventListener('load', () => {
     updateSyncBadge();
+    showToast('🚀 最新バージョン(v2.0)が読み込まれました');
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js')
         .then(reg => console.log('ServiceWorker registered'))
