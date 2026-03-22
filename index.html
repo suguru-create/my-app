@@ -826,31 +826,8 @@
   </div>
 
   <div class="section-title">⚠️ 要フォロー</div>
-  <div class="alert-list">
-    <div class="alert-card" onclick="openCustomerDetail(1)">
-      <div class="alert-icon">🔴</div>
-      <div>
-        <div class="alert-company">株式会社丸山製作所</div>
-        <div class="alert-detail">担当：鈴木部長　反応あり</div>
-      </div>
-      <div class="alert-days">128日</div>
-    </div>
-    <div class="alert-card warn" onclick="openCustomerDetail(2)">
-      <div class="alert-icon">🟠</div>
-      <div>
-        <div class="alert-company">医療法人明和会</div>
-        <div class="alert-detail">担当：田中院長　見積もり</div>
-      </div>
-      <div class="alert-days">97日</div>
-    </div>
-    <div class="alert-card warn" onclick="openCustomerDetail(6)">
-      <div class="alert-icon">🟠</div>
-      <div>
-        <div class="alert-company">豊川フーズ株式会社</div>
-        <div class="alert-detail">担当：加藤さん　脈なし</div>
-      </div>
-      <div class="alert-days">91日</div>
-    </div>
+  <div class="alert-list" id="dashboard-alert-list">
+    <!-- JSで動的に描画 -->
   </div>
 </div>
 
@@ -1660,6 +1637,114 @@
   }
   function closeModalOutside(e, id) { if(e.target.classList.contains('modal-overlay')) closeModal(id); }
 
+  function computeLastVisitDays(c, today) {
+    if (!c.lastVisitDate) return 0;
+    let d = new Date(c.lastVisitDate.replace(/\//g, '-'));
+    if (isNaN(d.getTime())) d = new Date(c.lastVisitDate);
+    if (isNaN(d.getTime())) return 0;
+    return Math.max(0, Math.floor((today - d) / (1000 * 60 * 60 * 24)));
+  }
+
+  // ダッシュボードの数値を現在のデータに基づいて更新
+  function updateDashboard() {
+    if(!customers || customers.length === 0) return;
+
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+    
+    // 1. 各顧客の状態を最新化
+    customers.forEach(c => { c.lastVisitDays = computeLastVisitDays(c, today); });
+
+    // 2. KPI集計
+    const visitsThisMonthArr = customers.filter(c => 
+      c.logs && c.logs.some(l => {
+        const d = new Date(l.date.replace(/\//g, '-'));
+        return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+      })
+    );
+    const visitsThisMonthCount = visitsThisMonthArr.length;
+
+    const ordersArr = customers.filter(c => c.status === '受注');
+    const ordersCount = ordersArr.length;
+    
+    const weekPlansArr = customers.filter(c => {
+      if (!c.nextVisitDate || c.nextVisitDate === '未定') return false;
+      const d = new Date(c.nextVisitDate.replace(/\//g, '-'));
+      const diff = (d - today) / (1000 * 60 * 60 * 24);
+      return diff >= -1 && diff <= 7;
+    });
+    const weekPlansCount = weekPlansArr.length;
+
+    const alertArr = customers.filter(c => Number(c.lastVisitDays) >= 90);
+    const alertsCount = alertArr.length;
+
+    console.log('Counts:', { visits: visitsThisMonthCount, orders: ordersCount, week: weekPlansCount, alerts: alertsCount });
+
+    // 3. UI反映 (KPI)
+    const elIds = {
+      'kpi-visit-count': visitsThisMonthCount,
+      'kpi-order-count': ordersCount,
+      'kpi-week-count': weekPlansCount,
+      'kpi-alert-count': alertsCount
+    };
+    for (const [id, val] of Object.entries(elIds)) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    }
+    const subEl = document.getElementById('kpi-visit-sub');
+    if (subEl) subEl.textContent = '今月の実績';
+
+    // 3.5 下部ナビのバッジ更新
+    const badge = document.querySelector('.nav-item[onclick*="screen-list"] .badge');
+    if (badge) {
+      if (alertsCount > 0) {
+        badge.textContent = alertsCount;
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // 4. アラートリストの描画
+    const alertListEl = document.getElementById('dashboard-alert-list');
+    if (alertListEl) {
+      if (alertsCount === 0) {
+        alertListEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px">現在アラートはありません</div>';
+      } else {
+        const sortedAlerts = [...alertArr].sort((a,b) => b.lastVisitDays - a.lastVisitDays);
+        alertListEl.innerHTML = sortedAlerts.map(c => `
+          <div class="alert-card ${c.lastVisitDays >= 120 ? '' : 'warn'}" onclick="openCustomerDetail(${c.id})">
+            <div class="alert-icon">${c.lastVisitDays >= 120 ? '🔴' : '🟠'}</div>
+            <div>
+              <div class="alert-company">${c.company}</div>
+              <div class="alert-detail">担当：${c.person || '--'}　${c.status}</div>
+            </div>
+            <div class="alert-days">${c.lastVisitDays}日</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // 5. ステータス内訳
+    const statusCounts = { '脈なし':0, '反応あり':0, '見積もり':0, '受注':0 };
+    customers.forEach(c => { if(statusCounts[c.status] !== undefined) statusCounts[c.status]++; });
+
+    const total = customers.length || 1;
+    const rows = document.querySelectorAll('.status-bar .status-row');
+    rows.forEach(row => {
+      const name = row.querySelector('.status-name').textContent.trim();
+      const count = statusCounts[name] || 0;
+      const percent = Math.round((count / total) * 100);
+      
+      const countEl = row.querySelector('.status-count');
+      const fillEl = row.querySelector('.status-fill');
+      if (countEl) countEl.textContent = count;
+      if (fillEl) fillEl.style.width = percent + '%';
+    });
+    console.log('--- updateDashboard End ---');
+  }
+
   // KPIカードやステータスバーからの絞り込み遷移
   function filterByStatus(statusName) {
     activeStatus = statusName;
@@ -1688,6 +1773,9 @@
     if(searchInput) searchInput.value = '';
 
     const today = new Date();
+    // 常に最新の放置日数を計算してからフィルタ
+    customers.forEach(c => { c.lastVisitDays = computeLastVisitDays(c, today); });
+
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
 
@@ -1697,25 +1785,19 @@
       const query = ''; 
       const filtered = customers.filter(c => {
         if (type === 'visit') {
-          // 今月の訪問実績があるか
           return c.logs && c.logs.some(l => {
             const d = new Date(l.date.replace(/\//g, '-'));
             return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
           });
         }
-        if (type === 'order') {
-          return c.status === '受注';
-        }
+        if (type === 'order') return c.status === '受注';
         if (type === 'week') {
-          // 次回予定が今日から7日以内か
           if (!c.nextVisitDate || c.nextVisitDate === '未定') return false;
           const d = new Date(c.nextVisitDate.replace(/\//g, '-'));
           const diff = (d - today) / (1000 * 60 * 60 * 24);
-          return diff >= -1 && diff <= 7; // 前日〜7日後
+          return diff >= -1 && diff <= 7;
         }
-        if (type === 'alert') {
-          return c.lastVisitDays >= 90;
-        }
+        if (type === 'alert') return Number(c.lastVisitDays) >= 90;
         return true;
       });
 
@@ -1783,6 +1865,7 @@
   function saveDb() {
     localStorage.setItem('sales_app_customers_db', JSON.stringify(customers));
     localStorage.setItem('sales_app_initialized', 'true');
+    updateDashboard(); // UI（ダッシュボード等）を最新にする
     // バックグラウンドでクラウドにバックアップ（失敗してもエラーは出さない）
     backupToCloud();
   }
@@ -1810,9 +1893,10 @@
       const result = await response.json();
       if (result.status === 'success' && result.data && result.data.length > 0) {
         customers = result.data;
-        saveDb(); // localStorageにも保存
-        renderCustomerList();
-        renderLogs();
+    saveDb(); // localStorageにも保存
+    updateDashboard(); // ダッシュボードを更新
+    renderCustomerList();
+    renderLogs();
         showToast('☁️ ' + customers.length + '件のデータを復元しました ✅');
       } else {
         // クラウドにもデータがない＝本当の初回 → サンプルデータを入れる
@@ -1852,6 +1936,7 @@
       }
     });
     saveDb();
+    updateDashboard();
   }
 
   // 初回アクセス時のデータ初期化（クラウド復元 or サンプルデータ）
@@ -2194,6 +2279,7 @@
     });
 
     saveDb();
+    updateDashboard();
     renderCustomerList();
     closeModal('modal-add');
     showToast('新しい顧客を登録しました ✅');
@@ -2212,12 +2298,9 @@
 
   function changeCustomerStatus(newStatus) {
     const c = customers.find(x => x.id === activeCustomerId);
-    if(c) {
       c.status = newStatus;
       saveDb();
       renderCustomerList();
-      openCustomerDetail(activeCustomerId);
-    }
     closeModal('modal-status');
     showToast(`ステータスを ${newStatus} に変更しました ✅`);
   }
@@ -2434,6 +2517,7 @@
   // ロード時＆オンライン復帰時の処理
   window.addEventListener('load', () => {
     updateSyncBadge();
+    updateDashboard(); // 最初期状態を反映
     showToast('🚀 最新バージョン(v2.4)が読み込まれました');
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js?v=2')
