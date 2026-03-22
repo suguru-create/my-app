@@ -277,6 +277,11 @@
   .status-count { font-size: 13px; font-weight: 700; color: var(--text); min-width: 30px; text-align: right; }
   .status-track { flex: 2; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
   .status-fill { height: 100%; border-radius: 3px; }
+  
+  /* タップ可能スタイルの追加 */
+  .status-row { cursor: pointer; transition: background 0.2s, transform 0.1s; padding: 4px; border-radius: 8px; }
+  .status-row:active { background: var(--surface2); transform: scale(0.98); }
+  .status-row:hover { background: var(--surface); }
 
   .alert-list { padding: 0 20px 16px; display: flex; flex-direction: column; gap: 10px; }
   .alert-card {
@@ -764,50 +769,54 @@
   </div>
 
   <div class="kpi-grid">
-    <div class="kpi-card blue">
+    <div class="kpi-card blue" onclick="showKpiList('visit')" style="cursor:pointer">
       <div class="kpi-label">今月の訪問数</div>
-      <div><span class="kpi-value">18</span><span class="kpi-unit">件</span></div>
-      <div class="kpi-sub">先月比 +3件</div>
+      <div><span class="kpi-value" id="kpi-visit-count">0</span><span class="kpi-unit">件</span></div>
+      <div class="kpi-sub" id="kpi-visit-sub">集計中…</div>
+      <div style="font-size:10px;color:var(--accent);margin-top:6px;opacity:0.7">タップしてリストを見る →</div>
     </div>
-    <div class="kpi-card green">
+    <div class="kpi-card green" onclick="showKpiList('order')" style="cursor:pointer">
       <div class="kpi-label">受注件数</div>
-      <div><span class="kpi-value">4</span><span class="kpi-unit">件</span></div>
-      <div class="kpi-sub">今月合計</div>
+      <div><span class="kpi-value" id="kpi-order-count">0</span><span class="kpi-unit">件</span></div>
+      <div class="kpi-sub" id="kpi-order-sub">今月合計</div>
+      <div style="font-size:10px;color:var(--accent2);margin-top:6px;opacity:0.7">タップしてリストを見る →</div>
     </div>
-    <div class="kpi-card orange">
+    <div class="kpi-card orange" onclick="showKpiList('week')" style="cursor:pointer">
       <div class="kpi-label">今週の予定</div>
-      <div><span class="kpi-value">6</span><span class="kpi-unit">社</span></div>
+      <div><span class="kpi-value" id="kpi-week-count">0</span><span class="kpi-unit">社</span></div>
       <div class="kpi-sub">次回訪問予定</div>
+      <div style="font-size:10px;color:var(--accent4);margin-top:6px;opacity:0.7">タップしてリストを見る →</div>
     </div>
-    <div class="kpi-card red">
+    <div class="kpi-card red" onclick="showKpiList('alert')" style="cursor:pointer">
       <div class="kpi-label">放置アラート</div>
-      <div><span class="kpi-value">3</span><span class="kpi-unit">社</span></div>
+      <div><span class="kpi-value" id="kpi-alert-count">0</span><span class="kpi-unit">社</span></div>
       <div class="kpi-sub">90日以上未訪問</div>
+      <div style="font-size:10px;color:var(--danger);margin-top:6px;opacity:0.7">タップしてリストを見る →</div>
     </div>
   </div>
 
   <div class="section-title">ステータス内訳</div>
   <div class="status-bar-wrap">
     <div class="status-bar">
-      <div class="status-row">
+      <div class="status-row" onclick="filterByStatus('脈なし')">
         <div class="status-dot" style="background:var(--status-none)"></div>
         <div class="status-name">脈なし</div>
         <div class="status-track"><div class="status-fill" style="width:45%;background:var(--status-none)"></div></div>
         <div class="status-count">21</div>
       </div>
-      <div class="status-row">
+      <div class="status-row" onclick="filterByStatus('反応あり')">
         <div class="status-dot" style="background:var(--status-react)"></div>
         <div class="status-name">反応あり</div>
         <div class="status-track"><div class="status-fill" style="width:30%;background:var(--status-react)"></div></div>
         <div class="status-count">14</div>
       </div>
-      <div class="status-row">
+      <div class="status-row" onclick="filterByStatus('見積もり')">
         <div class="status-dot" style="background:var(--status-quote)"></div>
         <div class="status-name">見積もり</div>
         <div class="status-track"><div class="status-fill" style="width:17%;background:var(--status-quote)"></div></div>
         <div class="status-count">8</div>
       </div>
-      <div class="status-row">
+      <div class="status-row" onclick="filterByStatus('受注')">
         <div class="status-dot" style="background:var(--status-order)"></div>
         <div class="status-name">受注</div>
         <div class="status-track"><div class="status-fill" style="width:9%;background:var(--status-order)"></div></div>
@@ -1651,6 +1660,116 @@
   }
   function closeModalOutside(e, id) { if(e.target.classList.contains('modal-overlay')) closeModal(id); }
 
+  // KPIカードやステータスバーからの絞り込み遷移
+  function filterByStatus(statusName) {
+    activeStatus = statusName;
+    activeCategory = 'all';
+    
+    // リスト画面のタブUIも更新
+    document.querySelectorAll('.filter-chip').forEach(c => {
+      if(c.textContent.includes(statusName)) c.classList.add('active');
+      else c.classList.remove('active');
+    });
+    document.querySelectorAll('.cat-tab').forEach(t => {
+      if(t.textContent === 'すべて') t.classList.add('active');
+      else t.classList.remove('active');
+    });
+
+    renderCustomerList();
+    showScreen('screen-list', document.querySelectorAll('.nav-item')[1]);
+  }
+
+  function showKpiList(type) {
+    activeCategory = 'all';
+    activeStatus = '';
+    
+    // 検索窓をクリア
+    const searchInput = document.getElementById('search-input');
+    if(searchInput) searchInput.value = '';
+
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+
+    // フィルタ条件の上書き
+    const originalFilter = renderCustomerList;
+    window.renderCustomerList = function() {
+      const query = ''; 
+      const filtered = customers.filter(c => {
+        if (type === 'visit') {
+          // 今月の訪問実績があるか
+          return c.logs && c.logs.some(l => {
+            const d = new Date(l.date.replace(/\//g, '-'));
+            return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+          });
+        }
+        if (type === 'order') {
+          return c.status === '受注';
+        }
+        if (type === 'week') {
+          // 次回予定が今日から7日以内か
+          if (!c.nextVisitDate || c.nextVisitDate === '未定') return false;
+          const d = new Date(c.nextVisitDate.replace(/\//g, '-'));
+          const diff = (d - today) / (1000 * 60 * 60 * 24);
+          return diff >= -1 && diff <= 7; // 前日〜7日後
+        }
+        if (type === 'alert') {
+          return c.lastVisitDays >= 90;
+        }
+        return true;
+      });
+
+      // リスト描画
+      const container = document.getElementById('customer-list-container');
+      const countEl   = document.getElementById('list-count');
+      if(countEl) countEl.textContent = `${filtered.length}社 (${getKpiLabel(type)})`;
+
+      container.innerHTML = filtered.map(c => renderCustomerCardHtml(c)).join('');
+      
+      // 1回切りで元に戻す（重要：通常の検索やタブ切り替えを壊さないため）
+      window.renderCustomerList = originalFilter;
+    };
+
+    renderCustomerList();
+    showScreen('screen-list', document.querySelectorAll('.nav-item')[1]);
+    
+    // チップの選択状態をリセット
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    if(type === 'order') {
+      document.querySelectorAll('.filter-chip').forEach(c => {
+        if(c.textContent.includes('受注')) c.classList.add('active');
+      });
+    }
+  }
+
+  function getKpiLabel(type) {
+    const labels = { visit: '今月の訪問', order: '受注', week: '今週の予定', alert: '放置アラート' };
+    return labels[type] || '';
+  }
+
+  // カードのHTML生成を共通化
+  function renderCustomerCardHtml(c) {
+    const borderClass = c.alert === 'danger' ? 'alert-border' : c.alert === 'warn' ? 'warn-border' : '';
+    const dateColor = activeStatus === 'next' ? 'var(--accent)' : 'inherit';
+    const metaHtml = c.lastVisitDays >= 90
+      ? `<span style="color:var(--danger)">⚠️ ${c.lastVisitDays}日未訪問</span><span style="color:var(--text3)">📅 次回：${c.nextVisitDate}</span>`
+      : `<span style="color:${dateColor}">📅 次回：${c.nextVisitDate}</span><span>🔢 ${c.visitCount}</span>`;
+    return `
+      <div class="customer-card ${borderClass}" onclick="openCustomerDetail(${c.id})">
+        <div class="card-top">
+          <div>
+            <div class="card-company">${c.company}</div>
+            <div class="card-person">${c.person}</div>
+          </div>
+          <span class="status-badge ${statusBadgeMap[c.status] || 'badge-none'}">${c.status}</span>
+        </div>
+        <div class="card-bottom">
+          <div class="card-meta">${metaHtml}</div>
+          <span class="cat-pill ${catPillMap[c.category] || 'pill-working'}">${catLabelMap[c.category] || c.category}</span>
+        </div>
+      </div>`;
+  }
+
   // ===== 顧客データ (Local Storage + クラウドバックアップ二重保存) =====
   let customers = [];
   const storedDb = localStorage.getItem('sales_app_customers_db');
@@ -1938,27 +2057,7 @@
       return;
     }
 
-    container.innerHTML = filtered.map(c => {
-      const borderClass = c.alert === 'danger' ? 'alert-border' : c.alert === 'warn' ? 'warn-border' : '';
-      const dateColor = activeStatus === 'next' ? 'var(--accent)' : 'inherit';
-      const metaHtml = c.lastVisitDays >= 90
-        ? `<span style="color:var(--danger)">⚠️ ${c.lastVisitDays}日未訪問</span><span style="color:var(--text3)">📅 次回：${c.nextVisitDate}</span>`
-        : `<span style="color:${dateColor}">📅 次回：${c.nextVisitDate}</span><span>🔢 ${c.visitCount}</span>`;
-      return `
-        <div class="customer-card ${borderClass}" onclick="openCustomerDetail(${c.id})">
-          <div class="card-top">
-            <div>
-              <div class="card-company">${c.company}</div>
-              <div class="card-person">${c.person}</div>
-            </div>
-            <span class="status-badge ${statusBadgeMap[c.status]}">${c.status}</span>
-          </div>
-          <div class="card-bottom">
-            <div class="card-meta">${metaHtml}</div>
-            <span class="cat-pill ${catPillMap[c.category]}">${catLabelMap[c.category]}</span>
-          </div>
-        </div>`;
-    }).join('');
+    container.innerHTML = filtered.map(c => renderCustomerCardHtml(c)).join('');
   }
 
   function setTab(el, cat) {
