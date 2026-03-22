@@ -575,7 +575,7 @@
 <div class="screen active" id="screen-dashboard">
   <div class="topbar">
     <div>
-      <div class="topbar-title" style="color:var(--accent2)">🏢 営業管理 (更新済v2.2)</div>
+      <div class="topbar-title" style="color:var(--accent2)">🏢 営業管理 (更新済v2.3)</div>
       <div class="topbar-sub">タカギユニフォーム</div>
     </div>
     <div style="display:flex;gap:8px">
@@ -1338,7 +1338,10 @@
       <div class="form-label">メモ</div>
       <textarea class="form-control" id="edit-memo" placeholder="メモなど…" style="min-height:70px"></textarea>
     </div>
-    <button class="topbar-action" style="width:100%;padding:14px;border-radius:12px;font-size:15px" onclick="saveEditCustomer()">保存する</button>
+    <button class="topbar-action" style="width:100%;padding:14px;border-radius:12px;font-size:15px;margin-bottom:10px" onclick="saveEditCustomer()">保存する</button>
+    <div style="text-align:center">
+      <button onclick="deleteCustomer()" style="background:none;border:none;color:var(--danger);font-size:13px;padding:8px;cursor:pointer">この顧客を削除する</button>
+    </div>
   </div>
 </div>
 
@@ -1673,6 +1676,20 @@
     } catch(err) {
       alert('保存中にエラーが発生しました:\n' + err.message);
       console.error(err);
+    }
+  }
+
+  function deleteCustomer() {
+    if(!confirm('この顧客情報を完全に削除してよろしいですか？')) return;
+    try {
+      customers = customers.filter(x => Number(x.id) !== activeCustomerId);
+      saveDb();
+      renderCustomerList();
+      closeModal('modal-edit');
+      showScreen('screen-list');
+      showToast('顧客情報を削除しました 🗑️');
+    } catch(err) {
+      alert('削除中にエラーが発生しました:\n' + err.message);
     }
   }
 
@@ -2108,7 +2125,7 @@
   // ロード時＆オンライン復帰時の処理
   window.addEventListener('load', () => {
     updateSyncBadge();
-    showToast('🚀 最新バージョン(v2.0)が読み込まれました');
+    showToast('🚀 最新バージョン(v2.3)が読み込まれました');
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js?v=2')
         .then(reg => console.log('ServiceWorker registered'))
