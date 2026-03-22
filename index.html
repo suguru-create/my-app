@@ -575,11 +575,11 @@
 <div class="screen active" id="screen-dashboard">
   <div class="topbar">
     <div>
-      <div class="topbar-title">🏢 営業管理 (最新版v2)</div>
+      <div class="topbar-title" style="color:var(--accent2)">🏢 営業管理 (更新済v2.2)</div>
       <div class="topbar-sub">タカギユニフォーム</div>
     </div>
     <div style="display:flex;gap:8px">
-      <button class="topbar-action" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3)" onclick="if(confirm('データベースを初期化しますか？')) { localStorage.clear(); location.reload(); }">🔄 初期化</button>
+      <button class="topbar-action" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-weight:400" onclick="refreshApp()">🔄 更新</button>
       <button class="topbar-action" onclick="showModal('modal-add')">＋ 追加</button>
     </div>
   </div>
@@ -1360,6 +1360,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // グローバルエラー捕捉
+  window.onerror = function(msg, url, line) {
+    alert("読み込みエラーが発生しました:\n" + msg + "\n行: " + line);
+  };
   // 今日の日付
   const now = new Date();
   document.getElementById('today-date').textContent =
@@ -1389,6 +1393,28 @@
   };
 
   let activeCustomerId = 1;
+
+  // アプリのキャッシュをクリアして強制更新（データは保持）
+  async function refreshApp() {
+    if(!confirm('アプリを最新の状態に更新（キャッシュ消去）しますか？\n※顧客データは消えません')) return;
+    try {
+      showToast('キャッシュをクリア中…');
+      // Service Workerの登録解除
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) { await r.unregister(); }
+      }
+      // Cache Storageの削除
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        for (const k of keys) { await caches.delete(k); }
+      }
+      // 再読み込み
+      window.location.reload(true);
+    } catch (e) {
+      alert('更新中にエラーが発生しました: ' + e.message);
+    }
+  }
 
   function formatDate(dateStr) {
     if(!dateStr) return '';
@@ -2084,7 +2110,7 @@
     updateSyncBadge();
     showToast('🚀 最新バージョン(v2.0)が読み込まれました');
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register('./sw.js?v=2')
         .then(reg => console.log('ServiceWorker registered'))
         .catch(err => console.error('ServiceWorker error', err));
     }
