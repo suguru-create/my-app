@@ -578,7 +578,10 @@
       <div class="topbar-title">🏢 営業管理</div>
       <div class="topbar-sub">タカギユニフォーム</div>
     </div>
-    <button class="topbar-action" onclick="showModal('modal-add')">＋ 追加</button>
+    <div style="display:flex;gap:8px">
+      <button class="topbar-action" style="background:var(--surface2);border:1px solid var(--border);color:var(--text3)" onclick="if(confirm('データベースを初期化しますか？')) { localStorage.clear(); location.reload(); }">🔄 初期化</button>
+      <button class="topbar-action" onclick="showModal('modal-add')">＋ 追加</button>
+    </div>
   </div>
 
   <div class="dash-hero">
@@ -642,7 +645,7 @@
 
   <div class="section-title">⚠️ 要フォロー</div>
   <div class="alert-list">
-    <div class="alert-card" onclick="showScreen('screen-detail')">
+    <div class="alert-card" onclick="openCustomerDetail(1)">
       <div class="alert-icon">🔴</div>
       <div>
         <div class="alert-company">株式会社丸山製作所</div>
@@ -650,7 +653,7 @@
       </div>
       <div class="alert-days">128日</div>
     </div>
-    <div class="alert-card warn">
+    <div class="alert-card warn" onclick="openCustomerDetail(2)">
       <div class="alert-icon">🟠</div>
       <div>
         <div class="alert-company">医療法人明和会</div>
@@ -658,7 +661,7 @@
       </div>
       <div class="alert-days">97日</div>
     </div>
-    <div class="alert-card warn">
+    <div class="alert-card warn" onclick="openCustomerDetail(6)">
       <div class="alert-icon">🟠</div>
       <div>
         <div class="alert-company">豊川フーズ株式会社</div>
@@ -719,15 +722,15 @@
       <button onclick="showScreen('screen-list')" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:0">←</button>
       <div>
         <div class="topbar-title">顧客詳細</div>
-        <div class="topbar-sub" id="detail-top-company">株式会社丸山製作所</div>
+        <div class="topbar-sub" id="detail-top-company">---</div>
       </div>
     </div>
     <button id="edit-btn" onclick="openEditModal()" style="background:none;border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:8px;font-size:12px;font-family:inherit;cursor:pointer">編集</button>
   </div>
 
   <div class="detail-header">
-    <div class="detail-company" id="detail-hero-company">株式会社丸山製作所</div>
-    <div class="detail-person" id="detail-hero-person">鈴木 太郎 部長</div>
+    <div class="detail-company" id="detail-hero-company">---</div>
+    <div class="detail-person" id="detail-hero-person">---</div>
     <div class="detail-badges" id="detail-badges">
       <span class="status-badge badge-react">反応あり</span>
       <span class="cat-pill pill-working" style="font-size:11px;padding:3px 10px">ワーキング</span>
@@ -1079,7 +1082,7 @@
   <!-- ステータス変化 -->
   <div class="section-title">ステータス変化（今月）</div>
   <div style="padding:0 20px 24px;display:flex;flex-direction:column;gap:8px">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
+    <div onclick="openCustomerDetail(2)" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
       <div>
         <div style="font-size:13px;color:var(--text)">医療法人明和会</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">メディカル</div>
@@ -1090,7 +1093,7 @@
         <span class="status-badge badge-quote">見積もり</span>
       </div>
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
+    <div onclick="openCustomerDetail(3)" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
       <div>
         <div style="font-size:13px;color:var(--text)">豊川商事株式会社</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">サービス</div>
@@ -1101,7 +1104,7 @@
         <span class="status-badge badge-order">受注</span>
       </div>
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between">
+    <div onclick="openCustomerDetail(5)" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
       <div>
         <div style="font-size:13px;color:var(--text)">中部フード株式会社</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">サービス</div>
@@ -1461,7 +1464,10 @@
     customers = [
       { id:1, company:'株式会社丸山製作所', person:'鈴木 太郎 部長', category:'working', status:'反応あり', phone:'0532-00-0000', mobile:'', fax:'', email:'', postalCode:'〒440-0000', address:'愛知県豊橋市神明町42-1', website:'', nextVisitDate:'2025/03/22', visitCount:'4回目', lastVisitDays:10, lastVisitDate:'2024/12/10', alert:'warn', memo:'作業服上下・安全靴に興味あり。4月の新入社員研修に合わせて検討したい。予算は1人あたり1.5万円程度。' },
       { id:2, company:'医療法人明和会',     person:'田中 義雄 院長', category:'medical', status:'見積もり', phone:'0532-11-2222', mobile:'', fax:'', email:'', postalCode:'', address:'愛知県豊橋市広小路1-1', website:'', nextVisitDate:'2025/03/25', visitCount:'6回目', lastVisitDays:20, lastVisitDate:'2024/11/15', alert:'', memo:'ナース服の刷新を検討中。3パターンの見積もりを提出済み。' },
-      { id:3, company:'豊川商事株式会社',   person:'山田 花子 課長', category:'service', status:'受注', phone:'0533-88-9999', mobile:'', fax:'', email:'', postalCode:'', address:'愛知県豊川市諏訪3-1', website:'', nextVisitDate:'2025/04/10', visitCount:'8回目', lastVisitDays:30, lastVisitDate:'2025/02/10', alert:'', memo:'サービススタッフ用ポロシャツ30着受注。納品スケジュール調整中。' }
+      { id:3, company:'豊川商事株式会社',   person:'山田 花子 課長', category:'service', status:'受注', phone:'0533-88-9999', mobile:'', fax:'', email:'', postalCode:'', address:'愛知県豊川市諏訪3-1', website:'', nextVisitDate:'2025/04/10', visitCount:'8回目', lastVisitDays:30, lastVisitDate:'2025/02/10', alert:'', memo:'サービススタッフ用ポロシャツ30着受注。納品スケジュール調整中。' },
+      { id:4, company:'名古屋ロジスティクス', person:'佐藤 健二 課長', category:'service', status:'脈なし', phone:'052-123-4567', mobile:'', fax:'', email:'', postalCode:'', address:'愛知県名古屋市中村区...', website:'', nextVisitDate:'2025/05/20', visitCount:'2回目', lastVisitDays:45, lastVisitDate:'2025/01/20', alert:'', memo:'物流センターの制服変更。まだ検討段階。' },
+      { id:5, company:'中部フード株式会社', person:'高橋 恵実 係長', category:'service', status:'反応あり', phone:'058-222-3333', mobile:'', fax:'', email:'', postalCode:'', address:'岐阜県岐阜市...', website:'', nextVisitDate:'2025/03/30', visitCount:'3回目', lastVisitDays:15, lastVisitDate:'2025/02/15', alert:'', memo:'カタログ送付済み。4月に打ち合わせ予定。' },
+      { id:6, company:'豊川フーズ株式会社', person:'加藤 慎太郎', category:'service', status:'脈なし', phone:'0533-99-8888', mobile:'', fax:'', email:'', postalCode:'', address:'愛知県豊川市...', website:'', nextVisitDate:'未定', visitCount:'1回目', lastVisitDays:91, lastVisitDate:'2024/11/01', alert:'warn', memo:'以前一度訪問したが反応薄。再アプローチ検討。' }
     ];
 
     customers.forEach(c => {
@@ -1498,51 +1504,95 @@
   }
 
   function openCustomerDetail(id) {
-    activeCustomerId = Number(id);
-    const c = customers.find(x => Number(x.id) === activeCustomerId);
-    if (!c) return;
+    try {
+      const targetId = Number(id);
+      activeCustomerId = targetId;
+      const c = customers.find(x => Number(x.id) === targetId);
+      if (!c) {
+        alert('指定された顧客データが見つかりません。ID: ' + id);
+        return;
+      }
 
-    document.getElementById('detail-top-company').textContent = c.company;
-    document.getElementById('detail-hero-company').textContent = c.company;
-    document.getElementById('detail-hero-person').textContent = c.person;
+      document.getElementById('detail-top-company').textContent = c.company || '';
+      document.getElementById('detail-hero-company').textContent = c.company || '';
+      document.getElementById('detail-hero-person').textContent = c.person || '';
 
-    const bClass = statusBadgeMap[c.status] || 'badge-none';
-    const cClass = catPillMap[c.category] || 'pill-working';
-    const cLabel = catLabelMap[c.category] || c.category;
-    document.getElementById('detail-badges').innerHTML = 
-      `<span class="status-badge ${bClass}">${c.status}</span>
-       <span class="cat-pill ${cClass}" style="font-size:11px;padding:3px 10px">${cLabel}</span>`;
+      const bClass = (statusBadgeMap && statusBadgeMap[c.status]) ? statusBadgeMap[c.status] : 'badge-none';
+      const cClass = (catPillMap && catPillMap[c.category]) ? catPillMap[c.category] : 'pill-working';
+      const cLabel = (catLabelMap && catLabelMap[c.category]) ? catLabelMap[c.category] : (c.category || '');
+      
+      const badgeContainer = document.getElementById('detail-badges');
+      if (badgeContainer) {
+        badgeContainer.innerHTML = 
+          `<span class="status-badge ${bClass}">${c.status || '未設定'}</span>
+           <span class="cat-pill ${cClass}" style="font-size:11px;padding:3px 10px">${cLabel || ''}</span>`;
+      }
 
-    document.getElementById('detail-postal-code').textContent = c.postalCode || '〒';
-    document.getElementById('detail-address').textContent = c.address || '';
-    document.getElementById('detail-phone').textContent = c.phone || '';
-    document.getElementById('detail-phone').href = c.phone ? 'tel:' + c.phone : '#';
-    document.getElementById('detail-mobile').textContent = c.mobile || '';
-    document.getElementById('detail-mobile').href = c.mobile ? 'tel:' + c.mobile : '#';
-    document.getElementById('detail-fax').textContent = c.fax || '';
-    document.getElementById('detail-email').textContent = c.email || '';
-    document.getElementById('detail-email').href = c.email ? 'mailto:' + c.email : '#';
-    document.getElementById('detail-website').textContent = c.website || '未設定';
-    document.getElementById('detail-website').href = c.website || '#';
-    
-    document.getElementById('detail-last-visit').textContent = c.lastVisitDate || '未訪問';
-    
-    let nextSpan = c.nextVisitDate || '未定';
-    if(c.lastVisitDays >= 90) {
-      nextSpan = `<span style="color:var(--danger)">⚠️ ${c.lastVisitDays}日未訪問</span><br><span style="color:var(--text3)">📅 次回：${c.nextVisitDate}</span>`;
-    } else if (c.nextVisitDate !== '未定') {
-      nextSpan = `<span style="color:var(--accent4)">${c.nextVisitDate}</span>`;
+      const pCode = document.getElementById('detail-postal-code');
+      if (pCode) pCode.textContent = c.postalCode || '〒';
+      
+      const addr = document.getElementById('detail-address');
+      if (addr) addr.textContent = c.address || '';
+      
+      const ph = document.getElementById('detail-phone');
+      if (ph) {
+        ph.textContent = c.phone || '';
+        ph.href = c.phone ? 'tel:' + c.phone : '#';
+      }
+      
+      const mb = document.getElementById('detail-mobile');
+      if (mb) {
+        mb.textContent = c.mobile || '';
+        mb.href = c.mobile ? 'tel:' + c.mobile : '#';
+      }
+      
+      const fx = document.getElementById('detail-fax');
+      if (fx) fx.textContent = c.fax || '';
+      
+      const em = document.getElementById('detail-email');
+      if (em) {
+        em.textContent = c.email || '';
+        em.href = c.email ? 'mailto:' + c.email : '#';
+      }
+      
+      const wb = document.getElementById('detail-website');
+      if (wb) {
+        wb.textContent = c.website || '未設定';
+        wb.href = c.website || '#';
+      }
+      
+      const lv = document.getElementById('detail-last-visit');
+      if (lv) lv.textContent = c.lastVisitDate || '未訪問';
+      
+      const nv = document.getElementById('detail-next-visit');
+      if (nv) {
+        let nextSpan = c.nextVisitDate || '未定';
+        if(c.lastVisitDays >= 90) {
+          nextSpan = `<span style="color:var(--danger)">⚠️ ${c.lastVisitDays}日未訪問</span><br><span style="color:var(--text3)">📅 次回：${c.nextVisitDate}</span>`;
+        } else if (c.nextVisitDate !== '未定') {
+          nextSpan = `<span style="color:var(--accent4)">${c.nextVisitDate}</span>`;
+        }
+        nv.innerHTML = nextSpan;
+      }
+      
+      const mm = document.getElementById('detail-memo');
+      if (mm) mm.textContent = c.memo || '';
+
+      const ltc = document.getElementById('log-top-company');
+      if (ltc) ltc.textContent = c.company || '';
+      
+      const lhc = document.getElementById('log-hero-company');
+      if (lhc) lhc.textContent = c.company || '';
+      
+      const lhp = document.getElementById('log-hero-person');
+      if (lhp) lhp.textContent = c.person || '';
+
+      renderLogs();
+      showScreen('screen-detail');
+    } catch(err) {
+      alert('詳細画面の描画中にエラーが発生しました:\n' + err.message);
+      console.error(err);
     }
-    document.getElementById('detail-next-visit').innerHTML = nextSpan;
-    
-    document.getElementById('detail-memo').textContent = c.memo;
-
-    document.getElementById('log-top-company').textContent = c.company;
-    document.getElementById('log-hero-company').textContent = c.company;
-    document.getElementById('log-hero-person').textContent = c.person;
-
-    renderLogs();
-    showScreen('screen-detail');
   }
 
   function openEditModal() {
@@ -1566,30 +1616,38 @@
   }
 
   function saveEditCustomer() {
-    const c = customers.find(x => Number(x.id) === activeCustomerId);
-    if (!c) return;
-    
-    const company = document.getElementById('edit-company').value.trim();
-    if (!company) { showToast('会社名は必須です'); return; }
-    
-    c.company = company;
-    c.person = document.getElementById('edit-person').value.trim();
-    c.phone = document.getElementById('edit-phone').value.trim();
-    c.mobile = document.getElementById('edit-mobile').value.trim();
-    c.fax = document.getElementById('edit-fax').value.trim();
-    c.email = document.getElementById('edit-email').value.trim();
-    c.postalCode = document.getElementById('edit-postal-code').value.trim();
-    c.address = document.getElementById('edit-address').value.trim();
-    c.website = document.getElementById('edit-website').value.trim();
-    c.category = document.getElementById('edit-category').value;
-    c.status = document.getElementById('edit-status').value;
-    c.memo = document.getElementById('edit-memo').value.trim();
-    
-    saveDb();
-    renderCustomerList();
-    openCustomerDetail(c.id); // Viewを更新
-    closeModal('modal-edit');
-    showToast('顧客情報を更新しました ✨');
+    try {
+      const c = customers.find(x => Number(x.id) === activeCustomerId);
+      if (!c) {
+        alert('編集対象の顧客が見つかりません。再読み込みしてください。');
+        return;
+      }
+      
+      const company = document.getElementById('edit-company').value.trim();
+      if (!company) { showToast('会社名は必須です'); return; }
+      
+      c.company = company;
+      c.person = document.getElementById('edit-person').value.trim();
+      c.phone = document.getElementById('edit-phone').value.trim();
+      c.mobile = document.getElementById('edit-mobile').value.trim();
+      c.fax = document.getElementById('edit-fax').value.trim();
+      c.email = document.getElementById('edit-email').value.trim();
+      c.postalCode = document.getElementById('edit-postal-code').value.trim();
+      c.address = document.getElementById('edit-address').value.trim();
+      c.website = document.getElementById('edit-website').value.trim();
+      c.category = document.getElementById('edit-category').value;
+      c.status = document.getElementById('edit-status').value;
+      c.memo = document.getElementById('edit-memo').value.trim();
+      
+      saveDb();
+      renderCustomerList();
+      openCustomerDetail(c.id); // Viewを更新
+      closeModal('modal-edit');
+      showToast('顧客情報を更新しました ✨');
+    } catch(err) {
+      alert('保存中にエラーが発生しました:\n' + err.message);
+      console.error(err);
+    }
   }
 
   // 初期表示用に丸山製作所のログを一度描画しておく
