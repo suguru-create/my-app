@@ -969,12 +969,23 @@
 <!-- ===== SCREEN: VISIT LOG ===== -->
 <div class="screen" id="screen-log">
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px;width:100%">
       <button onclick="showScreen('screen-detail')" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:0">←</button>
-      <div>
+      <div style="flex:1">
         <div class="topbar-title">訪問記録</div>
         <div class="topbar-sub" id="log-top-company"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- 顧客検索セクション -->
+  <div style="padding:16px; background:var(--surface2); border-bottom:1px solid var(--border)">
+    <div class="search-box" style="margin-bottom:0">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="log-search-input" placeholder="会社名・担当者で顧客を検索..." oninput="updateLogSearch()">
+    </div>
+    <div id="log-search-results" style="display:none; margin-top:8px; max-height:200px; overflow-y:auto; background:var(--surface1); border-radius:12px; border:1px solid var(--border); box-shadow:0 4px 12px rgba(0,0,0,0.1)">
+      <!-- 検索結果がここに表示される -->
     </div>
   </div>
 
@@ -1632,6 +1643,43 @@
     const fullList   = document.getElementById('full-log-list');
     if(detailList) detailList.innerHTML = html;
     if(fullList)   fullList.innerHTML   = html;
+  }
+
+  // 訪問ログ画面でのリアルタイム検索
+  function updateLogSearch() {
+    const query = document.getElementById('log-search-input').value.trim().toLowerCase();
+    const resultsContainer = document.getElementById('log-search-results');
+    
+    if (!query) {
+      resultsContainer.style.display = 'none';
+      return;
+    }
+
+    const filtered = customers.filter(c => 
+      c.company.toLowerCase().includes(query) || 
+      (c.person && c.person.toLowerCase().includes(query))
+    ).slice(0, 10); // 最大10件表示
+
+    if (filtered.length === 0) {
+      resultsContainer.innerHTML = '<div style="padding:12px; font-size:13px; color:var(--text3)">該当する顧客がいません</div>';
+    } else {
+      resultsContainer.innerHTML = filtered.map(c => `
+        <div style="padding:12px; border-bottom:1px solid var(--border); cursor:pointer" onclick="selectCustomerForLog(${c.id})">
+          <div style="font-weight:bold; font-size:14px; color:var(--text1)">${c.company}</div>
+          <div style="font-size:12px; color:var(--text2)">${c.person || ''}</div>
+        </div>
+      `).join('');
+    }
+    resultsContainer.style.display = 'block';
+  }
+
+  // 検索結果から顧客を選択
+  function selectCustomerForLog(id) {
+    activeCustomerId = Number(id);
+    document.getElementById('log-search-input').value = '';
+    document.getElementById('log-search-results').style.display = 'none';
+    renderLogs();
+    showToast('顧客を切り替えました');
   }
 
   // 画面切り替え
@@ -2659,9 +2707,9 @@
   window.addEventListener('load', () => {
     updateSyncBadge();
     updateDashboard(); // 最初期状態を反映
-    showToast('🚀 最新バージョン(v2.6)が読み込まれました');
+    showToast('🚀 最新バージョン(v2.7)が読み込まれました');
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=4')
+      navigator.serviceWorker.register('./sw.js?v=5')
         .then(reg => console.log('ServiceWorker registered'))
         .catch(err => console.error('ServiceWorker error', err));
     }
