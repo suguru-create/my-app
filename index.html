@@ -2518,9 +2518,9 @@
   window.addEventListener('load', () => {
     updateSyncBadge();
     updateDashboard(); // 最初期状態を反映
-    showToast('🚀 最新バージョン(v2.4)が読み込まれました');
+    showToast('🚀 最新バージョン(v2.5)が読み込まれました');
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=2')
+      navigator.serviceWorker.register('./sw.js?v=3')
         .then(reg => console.log('ServiceWorker registered'))
         .catch(err => console.error('ServiceWorker error', err));
     }
