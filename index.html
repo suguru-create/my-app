@@ -744,6 +744,43 @@
   .scan-dot:nth-child(3) { animation-delay: 0.4s; }
   @keyframes dotPulse { 0%,80%,100%{opacity:0.3;transform:scale(0.7)} 40%{opacity:1;transform:scale(1.1)} }
   .scan-text { font-size: 14px; color: var(--text2); }
+  /* インライン日付入力 */
+  .inline-date-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: inherit;
+    font-size: 14px;
+    text-align: right;
+    color-scheme: dark;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    min-width: 100px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  /* 未入力時にプレースホルダーを表示するトリック */
+  .inline-date-input::before {
+    content: attr(data-placeholder);
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: inherit;
+    font-weight: inherit;
+    pointer-events: none;
+  }
+  .inline-date-input:focus::before,
+  .inline-date-input:not([value=""])::before {
+    display: none;
+  }
+  .inline-date-input:focus {
+    border-color: var(--accent);
+    background: rgba(255, 255, 255, 0.1);
+  }
 </style>
 
 </head>
@@ -944,11 +981,16 @@
       </div>
       <div class="info-row">
         <div class="info-label">最終訪問日</div>
-        <div class="info-value" id="detail-last-visit">2024年12月10日</div>
+        <div class="info-value">
+          <input type="date" class="inline-date-input" id="detail-last-visit-input" data-placeholder="未訪問" onchange="updateDetailDate('lastVisitDate', this.value)">
+        </div>
       </div>
       <div class="info-row">
         <div class="info-label">次回予定日</div>
-        <div class="info-value" id="detail-next-visit" style="color:var(--accent4)">2025年3月22日（3日後）</div>
+        <div class="info-value" style="display:flex; flex-direction:column; align-items:flex-end; gap:4px">
+          <div id="detail-next-visit-alert" style="font-size:11px; text-align:right"></div>
+          <input type="date" class="inline-date-input" id="detail-next-visit-input" data-placeholder="未定" style="color:var(--accent4); font-weight:600" onchange="updateDetailDate('nextVisitDate', this.value)">
+        </div>
       </div>
       <div class="info-row">
         <div class="info-label">メモ</div>
@@ -2108,18 +2150,33 @@
         wb.href = c.website || '#';
       }
       
-      const lv = document.getElementById('detail-last-visit');
-      if (lv) lv.textContent = c.lastVisitDate || '未訪問';
+      const formatDateForInput = (dStr) => {
+        if (!dStr || dStr === '未定' || dStr === '未訪問') return '';
+        let val = dStr.replace(/\//g, '-');
+        return val.length > 10 ? val.substring(0, 10) : val;
+      };
+
+      const lvi = document.getElementById('detail-last-visit-input');
+      if (lvi) {
+        const val = formatDateForInput(c.lastVisitDate);
+        lvi.value = val;
+        lvi.setAttribute('value', val); // CSSのセレクタ [value=""] 用
+      }
       
-      const nv = document.getElementById('detail-next-visit');
-      if (nv) {
-        let nextSpan = c.nextVisitDate || '未定';
-        if(c.lastVisitDays >= 90) {
-          nextSpan = `<span style="color:var(--danger)">⚠️ ${c.lastVisitDays}日未訪問</span><br><span style="color:var(--text3)">📅 次回：${c.nextVisitDate}</span>`;
-        } else if (c.nextVisitDate !== '未定') {
-          nextSpan = `<span style="color:var(--accent4)">${c.nextVisitDate}</span>`;
+      const nvi = document.getElementById('detail-next-visit-input');
+      if (nvi) {
+        const val = formatDateForInput(c.nextVisitDate);
+        nvi.value = val;
+        nvi.setAttribute('value', val); // CSSのセレクタ [value=""] 用
+      }
+      
+      const nva = document.getElementById('detail-next-visit-alert');
+      if (nva) {
+        if(c.lastVisitDays >= 90 && c.status !== '受注') {
+          nva.innerHTML = `<span style="color:var(--danger)">⚠️ ${c.lastVisitDays}日未訪問</span>`;
+        } else {
+          nva.innerHTML = '';
         }
-        nv.innerHTML = nextSpan;
       }
       
       const mm = document.getElementById('detail-memo');
@@ -2223,6 +2280,39 @@
       alert('保存中にエラーが発生しました:\n' + err.message);
       console.error(err);
     }
+  }
+
+  function updateDetailDate(field, value) {
+    const c = customers.find(x => Number(x.id) === activeCustomerId);
+    if (!c) return;
+    
+    // 保存時は YYYY/MM/DD 形式に統一
+    const formatted = value ? value.replace(/-/g, '/') : '';
+    c[field] = formatted;
+    
+    // UI反映（属性を更新してCSSのセレクタに反映させる）
+    const inputId = field === 'lastVisitDate' ? 'detail-last-visit-input' : 'detail-next-visit-input';
+    const inputEl = document.getElementById(inputId);
+    if (inputEl) {
+      inputEl.setAttribute('value', value);
+    }
+
+    if (field === 'lastVisitDate') {
+      c.lastVisitDays = getDaysFromToday(c.lastVisitDate);
+      // アラート判定の更新
+      if (c.status !== '受注') {
+        if (c.lastVisitDays >= 120) c.alert = 'danger';
+        else if (c.lastVisitDays >= 90) c.alert = 'warn';
+        else c.alert = '';
+      } else {
+        c.alert = '';
+      }
+    }
+    
+    saveDb();
+    updateDashboard();
+    renderCustomerList();
+    showToast('日付を更新しました ✨');
   }
 
   function deleteCustomer() {
@@ -2388,8 +2478,13 @@
 
     if(!com) { showToast('会社名を入力してください'); return; }
 
+    const visitDateVal = document.getElementById('new-visit-date').value;
+    const initialLastVisitDate = visitDateVal ? visitDateVal.replace(/-/g, '/') : '';
+    const initialVisitCount = initialLastVisitDate ? '1回目' : '0回目';
+    const initialLastVisitDays = initialLastVisitDate ? getDaysFromToday(initialLastVisitDate) : 0;
+
     const newId = customers.length ? Math.max(...customers.map(c => c.id)) + 1 : 1;
-    customers.unshift({
+    const newCustomer = {
       id: newId,
       company: com,
       person: per || '担当者未定',
@@ -2403,13 +2498,24 @@
       address: address,
       website: website,
       nextVisitDate: '未定',
-      visitCount: '0回目',
-      lastVisitDays: 0,
-      lastVisitDate: '',
+      visitCount: initialVisitCount,
+      lastVisitDays: initialLastVisitDays,
+      lastVisitDate: initialLastVisitDate,
       alert: '',
       memo: memo,
       logs: []
-    });
+    };
+
+    // 初回訪問日がある場合はログにも追加
+    if (initialLastVisitDate) {
+      newCustomer.logs.push({
+        count: '1回目',
+        date: initialLastVisitDate.replace(/\//g, '-'),
+        memo: '（新規登録時の初回訪問記録）'
+      });
+    }
+
+    customers.unshift(newCustomer);
 
     saveDb();
     updateDashboard();
@@ -2427,6 +2533,7 @@
     document.getElementById('new-address').value = '';
     document.getElementById('new-website').value = '';
     document.getElementById('new-memo').value = '';
+    document.getElementById('new-visit-date').value = '';
   }
 
   function changeCustomerStatus(newStatus) {
@@ -2829,9 +2936,9 @@
   window.addEventListener('load', () => {
     updateSyncBadge();
     updateDashboard(); // 最初期状態を反映
-    showToast('🚀 最新バージョン(v3.1)が読み込まれました');
+    showToast('🚀 最新バージョン(v3.2)が読み込まれました');
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=9')
+      navigator.serviceWorker.register('./sw.js?v=11')
         .then(reg => console.log('ServiceWorker registered'))
         .catch(err => console.error('ServiceWorker error', err));
     }
