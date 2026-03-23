@@ -1554,7 +1554,7 @@
     service: 'サービス',
   };
 
-  let activeCustomerId = 1;
+  let activeCustomerId = null;
 
   // アプリのキャッシュをクリアして強制更新（データは保持）
   async function refreshApp() {
@@ -1601,9 +1601,9 @@
       if (heroPersonEl) heroPersonEl.textContent = (c.person || '') + ' ' + (c.title || '');
       if (heroSectionEl) heroSectionEl.style.display = 'block';
     } else {
-      if (topCompanyEl) topCompanyEl.textContent = '顧客が選択されていません';
+      if (topCompanyEl) topCompanyEl.textContent = '顧客を選択してください';
       if (heroCompanyEl) heroCompanyEl.textContent = '顧客未選択';
-      if (heroPersonEl) heroPersonEl.textContent = 'リストから顧客を選んでください';
+      if (heroPersonEl) heroPersonEl.textContent = 'リストから訪問を記録する顧客を選んでください';
       if (heroSectionEl) heroSectionEl.style.display = 'none'; // 記録ボタンごと隠す
     }
 
@@ -1614,7 +1614,9 @@
     const countSelect = document.getElementById('new-log-count');
     if (countSelect) countSelect.value = nextLogCount + '回目';
 
-    const html = logs.length === 0
+    const html = (!c)
+      ? '<div style="padding:40px 20px;text-align:center;color:var(--text3);font-size:14px">顧客を選択すると、ここに訪問履歴が表示されます</div>'
+      : logs.length === 0
       ? '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">まだ訪問記録がありません</div>'
       : logs.slice().reverse().map((log, i) => `
         <div class="log-item" style="animation:fadeIn 0.2s ease ${i*0.05}s both">
@@ -2127,6 +2129,7 @@
     if(!confirm('この顧客情報を完全に削除してよろしいですか？')) return;
     try {
       customers = customers.filter(x => Number(x.id) !== activeCustomerId);
+      activeCustomerId = null; // 削除したら選択を解除
       saveDb();
       renderCustomerList();
       closeModal('modal-edit');
@@ -2137,7 +2140,7 @@
     }
   }
 
-  // 初期表示用に丸山製作所のログを一度描画しておく
+  // 初期読込（初期状態は顧客未選択のためメッセージが表示される）
   renderLogs();
 
   let activeCategory = 'all';
