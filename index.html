@@ -1494,18 +1494,25 @@
         </select>
       </div>
       <div class="form-group">
+        <div class="form-label">商談ステータス</div>
+        <select class="form-control" id="edit-status">
+          <option>脈なし</option>
+          <option>反応あり</option>
+          <option>見積もり</option>
+          <option>受注</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <div class="form-label">最終訪問日</div>
+        <input type="date" class="form-control" id="edit-last-visit">
+      </div>
+      <div class="form-group">
         <div class="form-label">次回訪問予定</div>
         <input type="date" class="form-control" id="edit-next-visit">
       </div>
-    </div>
-    <div class="form-group" style="padding:0 0 12px">
-      <div class="form-label">商談ステータス</div>
-      <select class="form-control" id="edit-status">
-        <option>脈なし</option>
-        <option>反応あり</option>
-        <option>見積もり</option>
-        <option>受注</option>
-      </select>
     </div>
 
     <div class="form-group" style="padding:0 0 16px">
@@ -1642,13 +1649,17 @@
       ? '<div style="padding:40px 20px;text-align:center;color:var(--text3);font-size:14px">顧客を選択すると、ここに訪問履歴が表示されます</div>'
       : logs.length === 0
       ? '<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">まだ訪問記録がありません</div>'
-      : logs.slice().reverse().map((log, i) => `
-        <div class="log-item" style="animation:fadeIn 0.2s ease ${i*0.05}s both">
+      : logs.slice().sort((a, b) => new Date(b.date.replace(/\//g, '-')) - new Date(a.date.replace(/\//g, '-'))).map((log, i) => `
+        <div class="log-item" style="animation:fadeIn 0.2s ease ${i*0.05}s both; position:relative">
           <div class="log-date">
             <span>${formatDate(log.date)}</span>
             <span class="log-count">${log.count}</span>
           </div>
           <div class="log-memo">${log.memo || '<span style="color:var(--text3)">メモなし</span>'}</div>
+          <div class="log-actions" style="position:absolute; top:12px; right:12px; display:flex; gap:10px">
+            <button onclick="editLog('${log.count}')" style="background:none; border:none; color:var(--accent); font-size:16px; cursor:pointer" title="編集">✏️</button>
+            <button onclick="deleteLog('${log.count}')" style="background:none; border:none; color:var(--danger); font-size:16px; cursor:pointer" title="削除">🗑️</button>
+          </div>
         </div>
       `).join('');
 
@@ -2053,7 +2064,6 @@
       document.getElementById('detail-hero-company').textContent = c.company || '';
       document.getElementById('detail-hero-person').textContent = c.person || '';
 
-      const CACHE_NAME = 'sales-app-v8';
       const bClass = (statusBadgeMap && statusBadgeMap[c.status]) ? statusBadgeMap[c.status] : 'badge-none';
       const cClass = (catPillMap && catPillMap[c.category]) ? catPillMap[c.category] : 'pill-working';
       const cLabel = (catLabelMap && catLabelMap[c.category]) ? catLabelMap[c.category] : (c.category || '');
@@ -2147,14 +2157,16 @@
     document.getElementById('edit-website').value = c.website || '';
     document.getElementById('edit-category').value = c.category || 'working';
     document.getElementById('edit-status').value = c.status || '脈なし';
-    // 既存の日付があれば input[type="date"] 形式 (YYYY-MM-DD) に変換
-    let nextDateValue = '';
-    if (c.nextVisitDate && c.nextVisitDate !== '未定') {
-      nextDateValue = c.nextVisitDate.replace(/\//g, '-');
-      if (nextDateValue.length === 10) { /* OK */ } 
-      else if (nextDateValue.length > 10) { nextDateValue = nextDateValue.substring(0, 10); }
-    }
-    document.getElementById('edit-next-visit').value = nextDateValue;
+    
+    // 日付フィールドの初期化 (YYYY-MM-DD)
+    const formatDateForInput = (dStr) => {
+      if (!dStr || dStr === '未定' || dStr === '未訪問') return '';
+      let val = dStr.replace(/\//g, '-');
+      return val.length > 10 ? val.substring(0, 10) : val;
+    };
+    
+    document.getElementById('edit-last-visit').value = formatDateForInput(c.lastVisitDate);
+    document.getElementById('edit-next-visit').value = formatDateForInput(c.nextVisitDate);
     document.getElementById('edit-memo').value = c.memo || '';
     
     showModal('modal-edit');
@@ -2182,9 +2194,24 @@
       c.website = document.getElementById('edit-website').value.trim();
       c.category = document.getElementById('edit-category').value;
       c.status = document.getElementById('edit-status').value;
-      // 保存時は YYYY/MM/DD 形式に統一
+      
+      // 保存時は YYYY/MM/DD 形式に統一し、経過日数も再計算
+      const lastDate = document.getElementById('edit-last-visit').value;
+      c.lastVisitDate = lastDate ? lastDate.replace(/-/g, '/') : '';
+      c.lastVisitDays = getDaysFromToday(c.lastVisitDate);
+
       const nextDate = document.getElementById('edit-next-visit').value;
       c.nextVisitDate = nextDate ? nextDate.replace(/-/g, '/') : '';
+
+      // アラート判定の更新
+      if (c.status !== '受注') {
+        if (c.lastVisitDays >= 120) c.alert = 'danger';
+        else if (c.lastVisitDays >= 90) c.alert = 'warn';
+        else c.alert = '';
+      } else {
+        c.alert = '';
+      }
+      
       c.memo = document.getElementById('edit-memo').value.trim();
       
       saveDb();
@@ -2476,6 +2503,58 @@
     setTimeout(() => showScreen('screen-detail'), 800);
   }
 
+  function editLog(count) {
+    const c = customers.find(x => Number(x.id) === activeCustomerId);
+    if (!c) return;
+    const log = c.logs.find(l => l.count === count);
+    if (!log) return;
+
+    // フォームに値をセット
+    document.getElementById('new-log-count').value = log.count;
+    document.getElementById('visit-date').value = log.date.replace(/\//g, '-');
+    document.getElementById('new-log-memo').value = log.memo || '';
+    
+    // 入力エリアへスクロール（記録ボタンのあたり）
+    const formSection = document.getElementById('log-hero-section');
+    if (formSection) formSection.scrollIntoView({ behavior: 'smooth' });
+    showToast('履歴を編集モードで読み込みました');
+  }
+
+  function deleteLog(count) {
+    if (!confirm('この訪問履歴を削除してもよろしいですか？')) return;
+    const c = customers.find(x => Number(x.id) === activeCustomerId);
+    if (!c || !c.logs) return;
+
+    c.logs = c.logs.filter(l => l.count !== count);
+    
+    // 最終訪問日と経過日数の再計算
+    if (c.logs.length > 0) {
+      c.logs.sort((a, b) => new Date(a.date.replace(/\//g, '-')) - new Date(b.date.replace(/\//g, '-')));
+      const latestLog = c.logs[c.logs.length - 1];
+      c.lastVisitDate = latestLog.date.replace(/-/g, '/');
+      c.lastVisitDays = getDaysFromToday(c.lastVisitDate);
+    } else {
+      c.lastVisitDate = '未訪問';
+      c.lastVisitDays = 0;
+    }
+
+    // アラート判定
+    if (c.status !== '受注') {
+      if (c.lastVisitDays >= 120) c.alert = 'danger';
+      else if (c.lastVisitDays >= 90) c.alert = 'warn';
+      else c.alert = '';
+    } else {
+      c.alert = '';
+    }
+
+    saveDb();
+    updateDashboard();
+    renderLogs();
+    renderCustomerList();
+    openCustomerDetail(c.id);
+    showToast('訪問履歴を削除しました 🗑️');
+  }
+
   // ===== レポート期間管理 =====
   let reportMode = 'month';
   let reportYear = 2025;
@@ -2750,9 +2829,9 @@
   window.addEventListener('load', () => {
     updateSyncBadge();
     updateDashboard(); // 最初期状態を反映
-    showToast('🚀 最新バージョン(v2.9)が読み込まれました');
+    showToast('🚀 最新バージョン(v3.1)が読み込まれました');
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=7')
+      navigator.serviceWorker.register('./sw.js?v=9')
         .then(reg => console.log('ServiceWorker registered'))
         .catch(err => console.error('ServiceWorker error', err));
     }
