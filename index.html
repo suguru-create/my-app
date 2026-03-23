@@ -1571,6 +1571,15 @@
 
   let activeCustomerId = null;
 
+  // 日数計算ヘルパー
+  function getDaysFromToday(dateStr) {
+    if (!dateStr || dateStr === '未定' || dateStr === '未訪問') return 0;
+    const d = new Date(dateStr.replace(/\//g, '-'));
+    if (isNaN(d.getTime())) return 0;
+    const diff = new Date() - d;
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+  }
+
   // アプリのキャッシュをクリアして強制更新（データは保持）
   async function refreshApp() {
     if(!confirm('アプリを最新の状態に更新（キャッシュ消去）しますか？\n※顧客データは消えません')) return;
@@ -2044,6 +2053,7 @@
       document.getElementById('detail-hero-company').textContent = c.company || '';
       document.getElementById('detail-hero-person').textContent = c.person || '';
 
+      const CACHE_NAME = 'sales-app-v8';
       const bClass = (statusBadgeMap && statusBadgeMap[c.status]) ? statusBadgeMap[c.status] : 'badge-none';
       const cClass = (catPillMap && catPillMap[c.category]) ? catPillMap[c.category] : 'pill-working';
       const cLabel = (catLabelMap && catLabelMap[c.category]) ? catLabelMap[c.category] : (c.category || '');
@@ -2137,7 +2147,14 @@
     document.getElementById('edit-website').value = c.website || '';
     document.getElementById('edit-category').value = c.category || 'working';
     document.getElementById('edit-status').value = c.status || '脈なし';
-    document.getElementById('edit-next-visit').value = (c.nextVisitDate && c.nextVisitDate.includes('-')) ? c.nextVisitDate : (c.nextVisitDate || '').replace(/\//g, '-');
+    // 既存の日付があれば input[type="date"] 形式 (YYYY-MM-DD) に変換
+    let nextDateValue = '';
+    if (c.nextVisitDate && c.nextVisitDate !== '未定') {
+      nextDateValue = c.nextVisitDate.replace(/\//g, '-');
+      if (nextDateValue.length === 10) { /* OK */ } 
+      else if (nextDateValue.length > 10) { nextDateValue = nextDateValue.substring(0, 10); }
+    }
+    document.getElementById('edit-next-visit').value = nextDateValue;
     document.getElementById('edit-memo').value = c.memo || '';
     
     showModal('modal-edit');
@@ -2165,7 +2182,9 @@
       c.website = document.getElementById('edit-website').value.trim();
       c.category = document.getElementById('edit-category').value;
       c.status = document.getElementById('edit-status').value;
-      c.nextVisitDate = document.getElementById('edit-next-visit').value.replace(/-/g, '/');
+      // 保存時は YYYY/MM/DD 形式に統一
+      const nextDate = document.getElementById('edit-next-visit').value;
+      c.nextVisitDate = nextDate ? nextDate.replace(/-/g, '/') : '';
       c.memo = document.getElementById('edit-memo').value.trim();
       
       saveDb();
@@ -2429,16 +2448,29 @@
       c.visitCount = c.logs.length + '回目';
     }
 
-    c.logs.sort((a, b) => new Date(a.date) - new Date(b.date));
+    c.logs.sort((a, b) => new Date(a.date.replace(/\//g, '-')) - new Date(b.date.replace(/\//g, '-')));
     
-    // 最終訪問日を更新（最新のログの日付をセット）
+    // 最終訪問日と経過日数を更新
     if(c.logs.length > 0) {
-      c.lastVisitDate = c.logs[c.logs.length - 1].date;
+      const latestLog = c.logs[c.logs.length - 1];
+      c.lastVisitDate = latestLog.date.replace(/-/g, '/');
+      c.lastVisitDays = getDaysFromToday(c.lastVisitDate);
+      
+      // アラート判定の更新（放置120日以上、90日以上）
+      if (c.status !== '受注') {
+        if (c.lastVisitDays >= 120) c.alert = 'danger';
+        else if (c.lastVisitDays >= 90) c.alert = 'warn';
+        else c.alert = '';
+      } else {
+        c.alert = ''; // 受注済みはアラートなし
+      }
     }
     
     saveDb();
+    updateDashboard(); // 統計を即座に再計算
     renderLogs();
     renderCustomerList();
+    openCustomerDetail(c.id); // 詳細画面のヘッダー情報を更新
     document.getElementById('new-log-memo').value = '';
     showToast('訪問ログを保存しました ✅');
     setTimeout(() => showScreen('screen-detail'), 800);
@@ -2718,9 +2750,9 @@
   window.addEventListener('load', () => {
     updateSyncBadge();
     updateDashboard(); // 最初期状態を反映
-    showToast('🚀 最新バージョン(v2.8)が読み込まれました');
+    showToast('🚀 最新バージョン(v2.9)が読み込まれました');
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=6')
+      navigator.serviceWorker.register('./sw.js?v=7')
         .then(reg => console.log('ServiceWorker registered'))
         .catch(err => console.error('ServiceWorker error', err));
     }
