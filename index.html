@@ -746,11 +746,11 @@
   .scan-text { font-size: 14px; color: var(--text2); }
   /* インライン日付入力 */
   .inline-date-input {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
+    background: none;
+    border: none;
     color: var(--text2);
-    border-radius: 6px;
-    padding: 4px 8px;
+    border-radius: 0;
+    padding: 0;
     font-family: inherit;
     font-size: 14px;
     text-align: right;
@@ -758,28 +758,46 @@
     outline: none;
     cursor: pointer;
     position: relative;
-    min-width: 100px;
+    min-width: 80px;
     appearance: none;
     -webkit-appearance: none;
   }
-  /* 未入力時にプレースホルダーを表示するトリック */
+  /* 入力欄を透過させ、背後のテキストやプレースホルダーを見せるための設定 */
+  .inline-date-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  /* 未入力時にプレースホルダーを表示するトリック（ブラウザのデフォルトを隠す） */
   .inline-date-input::before {
     content: attr(data-placeholder);
     position: absolute;
-    right: 8px;
+    right: 0;
     top: 50%;
     transform: translateY(-50%);
     color: inherit;
     font-weight: inherit;
     pointer-events: none;
+    display: block;
   }
+  /* 値がある時、またはフォーカス時はプレースホルダーを消す */
   .inline-date-input:focus::before,
   .inline-date-input:not([value=""])::before {
     display: none;
   }
+  /* ブラウザ標準の mm/dd/yyyy 表示を消す（一部のブラウザ向け） */
+  .inline-date-input:invalid {
+    color: transparent;
+  }
+  .inline-date-input:focus,
+  .inline-date-input:not([value=""]) {
+    color: var(--text2);
+  }
   .inline-date-input:focus {
-    border-color: var(--accent);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
   }
 </style>
 
@@ -987,8 +1005,8 @@
       </div>
       <div class="info-row">
         <div class="info-label">次回予定日</div>
-        <div class="info-value" style="display:flex; flex-direction:column; align-items:flex-end; gap:4px">
-          <div id="detail-next-visit-alert" style="font-size:11px; text-align:right"></div>
+        <div class="info-value" style="display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap">
+          <div id="detail-next-visit-alert" style="font-size:11px; line-height:1"></div>
           <input type="date" class="inline-date-input" id="detail-next-visit-input" data-placeholder="未定" style="color:var(--accent4); font-weight:600" onchange="updateDetailDate('nextVisitDate', this.value)">
         </div>
       </div>
