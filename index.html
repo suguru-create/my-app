@@ -1286,7 +1286,7 @@
   <button class="nav-item" onclick="showScreen('screen-list',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
     リスト
-    <div class="nav-badge">3</div>
+    <div class="nav-badge" style="display:none">0</div>
   </button>
   <button class="nav-item" onclick="showScreen('screen-log',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1696,7 +1696,7 @@
     if (subEl) subEl.textContent = '今月の実績';
 
     // 3.5 下部ナビのバッジ更新
-    const badge = document.querySelector('.nav-item[onclick*="screen-list"] .badge');
+    const badge = document.querySelector('.nav-item[onclick*="screen-list"] .nav-badge');
     if (badge) {
       if (alertsCount > 0) {
         badge.textContent = alertsCount;
