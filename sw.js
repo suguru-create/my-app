@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sales-app-v3';
+const CACHE_NAME = 'sales-app-v5';
 const urlsToCache = [
   './index.html',
   './manifest.json',

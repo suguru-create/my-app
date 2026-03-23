@@ -973,14 +973,14 @@
       <button onclick="showScreen('screen-detail')" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:0">←</button>
       <div>
         <div class="topbar-title">訪問記録</div>
-        <div class="topbar-sub" id="log-top-company">株式会社丸山製作所</div>
+        <div class="topbar-sub" id="log-top-company"></div>
       </div>
     </div>
   </div>
 
-  <div class="visit-hero">
-    <div class="visit-hero-company" id="log-hero-company">株式会社丸山製作所</div>
-    <div class="visit-hero-name" id="log-hero-person">鈴木 太郎 部長</div>
+  <div class="visit-hero" id="log-hero-section">
+    <div class="visit-hero-company" id="log-hero-company"></div>
+    <div class="visit-hero-name" id="log-hero-person"></div>
     <button class="visit-one-btn" onclick="oneButtonRecord()">
       ✅　今日の訪問を記録する
     </button>
@@ -1086,24 +1086,24 @@
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:13px;font-weight:700;color:var(--working)">🔵 ワーキング</span>
         </div>
-        <span style="font-size:12px;color:var(--text2)">訪問 <strong style="color:var(--text)">11件</strong></span>
+        <span style="font-size:12px;color:var(--text2)">訪問 <strong style="color:var(--text)" id="report-cat-working-visits">0件</strong></span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">脈なし</div>
-          <div style="font-size:18px;font-weight:900;color:var(--text)">12</div>
+          <div style="font-size:18px;font-weight:900;color:var(--text)" id="report-cat-working-none">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">反応あり</div>
-          <div style="font-size:18px;font-weight:900;color:var(--accent4)">7</div>
+          <div style="font-size:18px;font-weight:900;color:var(--accent4)" id="report-cat-working-react">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">見積もり</div>
-          <div style="font-size:18px;font-weight:900;color:var(--warn)">4</div>
+          <div style="font-size:18px;font-weight:900;color:var(--warn)" id="report-cat-working-quote">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">受注</div>
-          <div style="font-size:18px;font-weight:900;color:var(--accent2)">2</div>
+          <div style="font-size:18px;font-weight:900;color:var(--accent2)" id="report-cat-working-order">0</div>
         </div>
       </div>
     </div>
@@ -1114,24 +1114,24 @@
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:13px;font-weight:700;color:var(--medical)">🟣 メディカル</span>
         </div>
-        <span style="font-size:12px;color:var(--text2)">訪問 <strong style="color:var(--text)">7件</strong></span>
+        <span style="font-size:12px;color:var(--text2)">訪問 <strong style="color:var(--text)" id="report-cat-medical-visits">0件</strong></span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">脈なし</div>
-          <div style="font-size:18px;font-weight:900;color:var(--text)">5</div>
+          <div style="font-size:18px;font-weight:900;color:var(--text)" id="report-cat-medical-none">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">反応あり</div>
-          <div style="font-size:18px;font-weight:900;color:var(--accent4)">4</div>
+          <div style="font-size:18px;font-weight:900;color:var(--accent4)" id="report-cat-medical-react">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">見積もり</div>
-          <div style="font-size:18px;font-weight:900;color:var(--warn)">3</div>
+          <div style="font-size:18px;font-weight:900;color:var(--warn)" id="report-cat-medical-quote">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">受注</div>
-          <div style="font-size:18px;font-weight:900;color:var(--accent2)">1</div>
+          <div style="font-size:18px;font-weight:900;color:var(--accent2)" id="report-cat-medical-order">0</div>
         </div>
       </div>
     </div>
@@ -1142,24 +1142,24 @@
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:13px;font-weight:700;color:var(--service)">🟢 サービス</span>
         </div>
-        <span style="font-size:12px;color:var(--text2)">訪問 <strong style="color:var(--text)">4件</strong></span>
+        <span style="font-size:12px;color:var(--text2)">訪問 <strong style="color:var(--text)" id="report-cat-service-visits">0件</strong></span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">脈なし</div>
-          <div style="font-size:18px;font-weight:900;color:var(--text)">4</div>
+          <div style="font-size:18px;font-weight:900;color:var(--text)" id="report-cat-service-none">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">反応あり</div>
-          <div style="font-size:18px;font-weight:900;color:var(--accent4)">3</div>
+          <div style="font-size:18px;font-weight:900;color:var(--accent4)" id="report-cat-service-react">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">見積もり</div>
-          <div style="font-size:18px;font-weight:900;color:var(--warn)">1</div>
+          <div style="font-size:18px;font-weight:900;color:var(--warn)" id="report-cat-service-quote">0</div>
         </div>
         <div style="background:var(--surface2);border-radius:8px;padding:8px 4px">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">受注</div>
-          <div style="font-size:18px;font-weight:900;color:var(--accent2)">1</div>
+          <div style="font-size:18px;font-weight:900;color:var(--accent2)" id="report-cat-service-order">0</div>
         </div>
       </div>
     </div>
@@ -1180,34 +1180,34 @@
       <!-- ワーキング行 -->
       <div style="display:grid;grid-template-columns:80px repeat(4,1fr);padding:10px 12px;gap:4px;border-bottom:1px solid var(--border)">
         <div style="font-size:12px;font-weight:700;color:var(--working);display:flex;align-items:center">ワーキング</div>
-        <div style="font-size:16px;font-weight:900;color:var(--text);text-align:center">42</div>
-        <div style="font-size:16px;font-weight:900;color:var(--accent4);text-align:center">28</div>
-        <div style="font-size:16px;font-weight:900;color:var(--warn);text-align:center">15</div>
-        <div style="font-size:16px;font-weight:900;color:var(--accent2);text-align:center">9</div>
+        <div style="font-size:16px;font-weight:900;color:var(--text);text-align:center" id="total-working-none">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent4);text-align:center" id="total-working-react">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--warn);text-align:center" id="total-working-quote">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent2);text-align:center" id="total-working-order">0</div>
       </div>
       <!-- メディカル行 -->
       <div style="display:grid;grid-template-columns:80px repeat(4,1fr);padding:10px 12px;gap:4px;border-bottom:1px solid var(--border)">
         <div style="font-size:12px;font-weight:700;color:var(--medical);display:flex;align-items:center">メディカル</div>
-        <div style="font-size:16px;font-weight:900;color:var(--text);text-align:center">18</div>
-        <div style="font-size:16px;font-weight:900;color:var(--accent4);text-align:center">14</div>
-        <div style="font-size:16px;font-weight:900;color:var(--warn);text-align:center">9</div>
-        <div style="font-size:16px;font-weight:900;color:var(--accent2);text-align:center">4</div>
+        <div style="font-size:16px;font-weight:900;color:var(--text);text-align:center" id="total-medical-none">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent4);text-align:center" id="total-medical-react">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--warn);text-align:center" id="total-medical-quote">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent2);text-align:center" id="total-medical-order">0</div>
       </div>
       <!-- サービス行 -->
       <div style="display:grid;grid-template-columns:80px repeat(4,1fr);padding:10px 12px;gap:4px;border-bottom:1px solid var(--border)">
         <div style="font-size:12px;font-weight:700;color:var(--service);display:flex;align-items:center">サービス</div>
-        <div style="font-size:16px;font-weight:900;color:var(--text);text-align:center">12</div>
-        <div style="font-size:16px;font-weight:900;color:var(--accent4);text-align:center">9</div>
-        <div style="font-size:16px;font-weight:900;color:var(--warn);text-align:center">4</div>
-        <div style="font-size:16px;font-weight:900;color:var(--accent2);text-align:center">2</div>
+        <div style="font-size:16px;font-weight:900;color:var(--text);text-align:center" id="total-service-none">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent4);text-align:center" id="total-service-react">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--warn);text-align:center" id="total-service-quote">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent2);text-align:center" id="total-service-order">0</div>
       </div>
       <!-- 合計行 -->
       <div style="display:grid;grid-template-columns:80px repeat(4,1fr);padding:10px 12px;gap:4px;background:var(--surface2)">
         <div style="font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center">合計</div>
-        <div style="font-size:16px;font-weight:900;color:var(--text);text-align:center">72</div>
-        <div style="font-size:16px;font-weight:900;color:var(--accent4);text-align:center">51</div>
-        <div style="font-size:16px;font-weight:900;color:var(--warn);text-align:center">28</div>
-        <div style="font-size:16px;font-weight:900;color:var(--accent2);text-align:center">15</div>
+        <div style="font-size:16px;font-weight:900;color:var(--text);text-align:center" id="total-all-none">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent4);text-align:center" id="total-all-react">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--warn);text-align:center" id="total-all-quote">0</div>
+        <div style="font-size:16px;font-weight:900;color:var(--accent2);text-align:center" id="total-all-order">0</div>
       </div>
     </div>
   </div>
@@ -1217,23 +1217,23 @@
   <div class="funnel-wrap">
     <div class="funnel-card">
       <div class="funnel-row">
-        <div class="funnel-label"><span>脈なし</span><span>72社</span></div>
-        <div class="funnel-bar-bg"><div class="funnel-bar" style="width:100%;background:var(--status-none)"></div></div>
+        <div class="funnel-label"><span>脈なし</span><span id="funnel-count-none">0社</span></div>
+        <div class="funnel-bar-bg"><div class="funnel-bar" id="funnel-bar-none" style="width:0%;background:var(--status-none)"></div></div>
       </div>
-      <div class="funnel-arrow">↓ <span class="conversion-rate">71% → 反応あり</span></div>
+      <div class="funnel-arrow">↓ <span class="conversion-rate" id="funnel-rate-react">0% → 反応あり</span></div>
       <div class="funnel-row">
-        <div class="funnel-label"><span>反応あり</span><span>51社</span></div>
-        <div class="funnel-bar-bg"><div class="funnel-bar" style="width:71%;background:var(--status-react)"></div></div>
+        <div class="funnel-label"><span>反応あり</span><span id="funnel-count-react">0社</span></div>
+        <div class="funnel-bar-bg"><div class="funnel-bar" id="funnel-bar-react" style="width:0%;background:var(--status-react)"></div></div>
       </div>
-      <div class="funnel-arrow">↓ <span class="conversion-rate">55% → 見積もり</span></div>
+      <div class="funnel-arrow">↓ <span class="conversion-rate" id="funnel-rate-quote">0% → 見積もり</span></div>
       <div class="funnel-row">
-        <div class="funnel-label"><span>見積もり</span><span>28社</span></div>
-        <div class="funnel-bar-bg"><div class="funnel-bar" style="width:39%;background:var(--status-quote)"></div></div>
+        <div class="funnel-label"><span>見積もり</span><span id="funnel-count-quote">0社</span></div>
+        <div class="funnel-bar-bg"><div class="funnel-bar" id="funnel-bar-quote" style="width:0%;background:var(--status-quote)"></div></div>
       </div>
-      <div class="funnel-arrow">↓ <span class="conversion-rate">54% → 受注</span></div>
+      <div class="funnel-arrow">↓ <span class="conversion-rate" id="funnel-rate-order">0% → 受注</span></div>
       <div class="funnel-row">
-        <div class="funnel-label"><span>受注</span><span>15社</span></div>
-        <div class="funnel-bar-bg"><div class="funnel-bar" style="width:21%;background:var(--status-order)"></div></div>
+        <div class="funnel-label"><span>受注</span><span id="funnel-count-order">0社</span></div>
+        <div class="funnel-bar-bg"><div class="funnel-bar" id="funnel-bar-order" style="width:0%;background:var(--status-order)"></div></div>
       </div>
     </div>
   </div>
@@ -1286,7 +1286,7 @@
   <button class="nav-item" onclick="showScreen('screen-list',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
     リスト
-    <div class="nav-badge" style="display:none">0</div>
+    <div class="nav-badge" id="nav-badge-list" style="display:none">0</div>
   </button>
   <button class="nav-item" onclick="showScreen('screen-log',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1588,6 +1588,25 @@
 
   function renderLogs() {
     const c = customers.find(x => Number(x.id) === activeCustomerId);
+    
+    // 画面項目の更新（ヘッダー・ヒーロー）
+    const topCompanyEl = document.getElementById('log-top-company');
+    const heroCompanyEl = document.getElementById('log-hero-company');
+    const heroPersonEl = document.getElementById('log-hero-person');
+    const heroSectionEl = document.getElementById('log-hero-section');
+
+    if (c) {
+      if (topCompanyEl) topCompanyEl.textContent = c.company;
+      if (heroCompanyEl) heroCompanyEl.textContent = c.company;
+      if (heroPersonEl) heroPersonEl.textContent = (c.person || '') + ' ' + (c.title || '');
+      if (heroSectionEl) heroSectionEl.style.display = 'block';
+    } else {
+      if (topCompanyEl) topCompanyEl.textContent = '顧客が選択されていません';
+      if (heroCompanyEl) heroCompanyEl.textContent = '顧客未選択';
+      if (heroPersonEl) heroPersonEl.textContent = 'リストから顧客を選んでください';
+      if (heroSectionEl) heroSectionEl.style.display = 'none'; // 記録ボタンごと隠す
+    }
+
     const logs = (c && c.logs) ? c.logs : [];
     
     // 次の訪問回数を自動設定
@@ -1623,6 +1642,7 @@
     if(navBtn) navBtn.classList.add('active');
     window.scrollTo(0,0);
     if(id === 'screen-log' || id === 'screen-detail') renderLogs();
+    if(id === 'screen-report') updateReport();
   }
 
   // モーダル
@@ -1647,11 +1667,20 @@
 
   // ダッシュボードの数値を現在のデータに基づいて更新
   function updateDashboard() {
-    if(!customers || customers.length === 0) return;
-
     const today = new Date();
     const currentYear = today.getFullYear();
     const currentMonth = today.getMonth();
+    
+    // 顧客がいない場合は数値をリセットして終了
+    if(!customers || customers.length === 0) {
+      const elIds = ['kpi-visit-count', 'kpi-order-count', 'kpi-week-count', 'kpi-alert-count'];
+      elIds.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '0'; });
+      const alertListEl = document.getElementById('dashboard-alert-list');
+      if(alertListEl) alertListEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px">リストが空です</div>';
+      const badge = document.getElementById('nav-badge-list');
+      if(badge) badge.style.display = 'none';
+      return;
+    }
     
     // 1. 各顧客の状態を最新化
     customers.forEach(c => { c.lastVisitDays = computeLastVisitDays(c, today); });
@@ -1696,7 +1725,7 @@
     if (subEl) subEl.textContent = '今月の実績';
 
     // 3.5 下部ナビのバッジ更新
-    const badge = document.querySelector('.nav-item[onclick*="screen-list"] .nav-badge');
+    const badge = document.getElementById('nav-badge-list');
     if (badge) {
       if (alertsCount > 0) {
         badge.textContent = alertsCount;
@@ -1866,6 +1895,7 @@
     localStorage.setItem('sales_app_customers_db', JSON.stringify(customers));
     localStorage.setItem('sales_app_initialized', 'true');
     updateDashboard(); // UI（ダッシュボード等）を最新にする
+    updateReport();    // レポートも最新にする
     // バックグラウンドでクラウドにバックアップ（失敗してもエラーは出さない）
     backupToCloud();
   }
@@ -2399,30 +2429,138 @@
   // レポートのKPI・ラベルを更新（ダミーデータで変化を演出）
   function updateReport() {
     const label = getPeriodLabel();
-    document.getElementById('report-period-label').textContent = label;
-    document.getElementById('cat-section-title').textContent = `カテゴリ別集計（${label}）`;
+    const periodLabelEl = document.getElementById('report-period-label');
+    const catTitleEl = document.getElementById('cat-section-title');
+    if(periodLabelEl) periodLabelEl.textContent = label;
+    if(catTitleEl) catTitleEl.textContent = `カテゴリ別集計（${label}）`;
 
-    // モードや月によってダミー数値を変える
-    let visits, orders, sub;
-    if(reportMode === 'month') {
-      const seed = (reportYear * 12 + reportMonth) % 7;
-      visits = 16 + seed * 2;
-      orders = 1 + (seed % 4);
-      const diff = seed - 3;
-      sub = diff >= 0 ? `前期比 +${diff}件` : `前期比 ${diff}件`;
+    // フィルタ期間の算出
+    let startDate, endDate;
+    if (reportMode === 'month') {
+      startDate = new Date(reportYear, reportMonth - 1, 1);
+      endDate = new Date(reportYear, reportMonth, 0, 23, 59, 59);
     } else {
       const s = document.getElementById('range-start').value;
       const e = document.getElementById('range-end').value;
-      if(!s || !e) return;
-      const days = Math.round((new Date(e) - new Date(s)) / 86400000) + 1;
-      visits = Math.max(1, Math.round(days * 0.7));
-      orders = Math.max(0, Math.round(days * 0.07));
-      sub = `${days}日間の合計`;
+      if (!s || !e) return;
+      startDate = new Date(s);
+      endDate = new Date(e);
+      endDate.setHours(23, 59, 59);
     }
-    document.getElementById('kpi-visits').textContent = visits;
-    document.getElementById('kpi-orders').textContent = orders;
-    document.getElementById('kpi-visits-sub').textContent = sub;
-    document.getElementById('kpi-orders-sub').textContent = sub;
+
+    // 1. 期間内の訪問件数の集計
+    let periodVisits = 0;
+    const catStats = {
+      working: { visits:0, '脈なし':0, '反応あり':0, '見積もり':0, '受注':0 },
+      medical: { visits:0, '脈なし':0, '反応あり':0, '見積もり':0, '受注':0 },
+      service: { visits:0, '脈なし':0, '反応あり':0, '見積もり':0, '受注':0 }
+    };
+
+    customers.forEach(c => {
+      // ログから期間内の訪問を抽出
+      if (c.logs) {
+        c.logs.forEach(l => {
+          const d = new Date(l.date.replace(/\//g, '-'));
+          if (d >= startDate && d <= endDate) {
+            periodVisits++;
+            if (catStats[c.category]) catStats[c.category].visits++;
+          }
+        });
+      }
+      // カテゴリ別の現ステータス内訳（全期間または特定要件なら期間フィルタが必要だが、現状は「現在の状態」を表示）
+      if (catStats[c.category] && catStats[c.category][c.status] !== undefined) {
+        catStats[c.category][c.status]++;
+      }
+    });
+
+    // 期間内の受注数（ここでは「期間内に新しく受注した」ではなく「現在受注ステータスの顧客数」として表示）
+    const periodOrders = customers.filter(c => c.status === '受注').length;
+
+    // UI反映：メインKPI
+    document.getElementById('kpi-visits').textContent = periodVisits;
+    document.getElementById('kpi-orders').textContent = periodOrders;
+    document.getElementById('kpi-visits-sub').textContent = '期間中の延べ訪問数';
+    document.getElementById('kpi-orders-sub').textContent = '現在の合計受注社数';
+
+    // UI反映：カテゴリ別集計
+    ['working', 'medical', 'service'].forEach(cat => {
+      const s = catStats[cat];
+      const prefix = `report-cat-${cat}-`;
+      const elVisits = document.getElementById(prefix + 'visits');
+      if(elVisits) elVisits.textContent = s.visits + '件';
+      
+      const elNone = document.getElementById(prefix + 'none');
+      if(elNone) elNone.textContent = s['脈なし'];
+      
+      const elReact = document.getElementById(prefix + 'react');
+      if(elReact) elReact.textContent = s['反応あり'];
+      
+      const elQuote = document.getElementById(prefix + 'quote');
+      if(elQuote) elQuote.textContent = s['見積もり'];
+      
+      const elOrder = document.getElementById(prefix + 'order');
+      if(elOrder) elOrder.textContent = s['受注'];
+    });
+
+    // 2. 累計集計（全期間）
+    const totalStats = {
+      working: { '脈なし':0, '反応あり':0, '見積もり':0, '受注':0 },
+      medical: { '脈なし':0, '反応あり':0, '見積もり':0, '受注':0 },
+      service: { '脈なし':0, '反応あり':0, '見積もり':0, '受注':0 },
+      all:     { '脈なし':0, '反応あり':0, '見積もり':0, '受注':0 }
+    };
+
+    customers.forEach(c => {
+      if (totalStats[c.category] && totalStats[c.category][c.status] !== undefined) {
+        totalStats[c.category][c.status]++;
+        totalStats.all[c.status]++;
+      }
+    });
+
+    // 累計表のUI反映
+    ['working', 'medical', 'service', 'all'].forEach(cat => {
+      const s = totalStats[cat];
+      const prefix = `total-${cat}-`;
+      const elNone = document.getElementById(prefix + 'none');
+      const elReact = document.getElementById(prefix + 'react');
+      const elQuote = document.getElementById(prefix + 'quote');
+      const elOrder = document.getElementById(prefix + 'order');
+      
+      if(elNone) elNone.textContent = s['脈なし'];
+      if(elReact) elReact.textContent = s['反応あり'];
+      if(elQuote) elQuote.textContent = s['見積もり'];
+      if(elOrder) elOrder.textContent = s['受注'];
+    });
+
+    // 3. 成約率ファネル（全期間）
+    const fNone  = totalStats.all['脈なし'];
+    const fReact = totalStats.all['反応あり'];
+    const fQuote = totalStats.all['見積もり'];
+    const fOrder = totalStats.all['受注'];
+    
+    // 分母（合計）
+    const fTotal = fNone + fReact + fQuote + fOrder || 1;
+
+    document.getElementById('funnel-count-none').textContent = fNone + '社';
+    document.getElementById('funnel-count-react').textContent = fReact + '社';
+    document.getElementById('funnel-count-quote').textContent = fQuote + '社';
+    document.getElementById('funnel-count-order').textContent = fOrder + '社';
+
+    // バーの長さ（最大値を100%とした相対比）
+    const maxCount = Math.max(fNone, fReact, fQuote, fOrder, 1);
+    document.getElementById('funnel-bar-none').style.width = (fNone / maxCount * 100) + '%';
+    document.getElementById('funnel-bar-react').style.width = (fReact / maxCount * 100) + '%';
+    document.getElementById('funnel-bar-quote').style.width = (fQuote / maxCount * 100) + '%';
+    document.getElementById('funnel-bar-order').style.width = (fOrder / maxCount * 100) + '%';
+
+    // 転換率の計算
+    const rateReact = fNone > 0 ? Math.round((fReact / fNone) * 100) : 0;
+    const rateQuote = fReact > 0 ? Math.round((fQuote / fReact) * 100) : 0;
+    const rateOrder = fQuote > 0 ? Math.round((fOrder / fQuote) * 100) : 0;
+
+    document.getElementById('funnel-rate-react').textContent = `${rateReact}% → 反応あり`;
+    document.getElementById('funnel-rate-quote').textContent = `${rateQuote}% → 見積もり`;
+    document.getElementById('funnel-rate-order').textContent = `${rateOrder}% → 受注`;
   }
 
   // 期間指定の日付変更を検知
@@ -2518,9 +2656,9 @@
   window.addEventListener('load', () => {
     updateSyncBadge();
     updateDashboard(); // 最初期状態を反映
-    showToast('🚀 最新バージョン(v2.5)が読み込まれました');
+    showToast('🚀 最新バージョン(v2.6)が読み込まれました');
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=3')
+      navigator.serviceWorker.register('./sw.js?v=4')
         .then(reg => console.log('ServiceWorker registered'))
         .catch(err => console.error('ServiceWorker error', err));
     }
