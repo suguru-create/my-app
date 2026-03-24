@@ -1582,7 +1582,7 @@
     </div>
     <button class="topbar-action" style="width:100%;padding:14px;border-radius:12px;font-size:15px;margin-bottom:10px" onclick="saveEditCustomer()">保存する</button>
     <div style="text-align:center">
-      <button onclick="deleteCustomer()" style="background:none;border:none;color:var(--danger);font-size:13px;padding:8px;cursor:pointer">この顧客を削除する</button>
+      <button id="btn-delete-customer" style="background:none;border:none;color:var(--danger);font-size:13px;padding:8px;cursor:pointer">この顧客を削除する</button>
     </div>
   </div>
 </div>
@@ -2291,6 +2291,7 @@
       c.memo = document.getElementById('edit-memo').value.trim();
       
       saveDb();
+      updateDashboard(); // ダッシュボードを更新
       renderCustomerList();
       openCustomerDetail(c.id); // Viewを更新
       closeModal('modal-edit');
@@ -2335,17 +2336,24 @@
   }
 
   function deleteCustomer() {
-    if(!confirm('この顧客情報を完全に削除してよろしいですか？')) return;
+    console.log('deleteCustomer called. activeCustomerId:', activeCustomerId);
+    if(!activeCustomerId) {
+      alert('削除対象の顧客が選択されていません。');
+      return;
+    }
+    if(!confirm('この顧客情報を完全に削除してよろしいですか？\n削除後は元に戻せません。')) return;
     try {
       customers = customers.filter(x => Number(x.id) !== activeCustomerId);
       activeCustomerId = null; // 削除したら選択を解除
       saveDb();
+      // saveDb() 内で updateDashboard, updateReport, backupToCloud が呼ばれる
       renderCustomerList();
       closeModal('modal-edit');
       showScreen('screen-list');
       showToast('顧客情報を削除しました 🗑️');
     } catch(err) {
       alert('削除中にエラーが発生しました:\n' + err.message);
+      console.error(err);
     }
   }
 
@@ -2865,6 +2873,8 @@
   // 期間指定の日付変更を検知
   document.getElementById('range-start').addEventListener('change', updateReport);
   document.getElementById('range-end').addEventListener('change', updateReport);
+  const btnDelete = document.getElementById('btn-delete-customer');
+  if (btnDelete) btnDelete.addEventListener('click', deleteCustomer);
 
   // 初期値セット
   document.getElementById('range-start').value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
@@ -2955,9 +2965,9 @@
   window.addEventListener('load', () => {
     updateSyncBadge();
     updateDashboard(); // 最初期状態を反映
-    showToast('🚀 最新バージョン(v3.2)が読み込まれました');
+    showToast('🚀 最新バージョン(v3.3)が読み込まれました');
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=11')
+      navigator.serviceWorker.register('./sw.js?v=14')
         .then(reg => console.log('ServiceWorker registered'))
         .catch(err => console.error('ServiceWorker error', err));
     }
